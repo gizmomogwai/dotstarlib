@@ -1,11 +1,11 @@
-directory "out"
+require 'rake/extensiontask'
 
-file "out/dotstar" => ["src/main/cpp/main.cpp", "src/lib/cpp/dotstarlib.h", "out"] do
-  sh "g++ -std=c++11 -o out/dotstar -Isrc/lib/cpp src/main/cpp/main.cpp"
-end
-
-task :run => "out/dotstar" do
-  sh "sudo out/dotstar 60"
+Rake::ExtensionTask.new do |ext|
+  ext.name = 'dotstar'
+  ext.ext_dir = 'src/lib/ruby'
+  ext.config_script = 'extconf.rb'
+  ext.tmp_dir = 'tmp'
+  ext.source_pattern = "*.{cpp}"
 end
 
 task :default => "run"

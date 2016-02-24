@@ -1,0 +1,5 @@
+* Prerequisites
+** sudo apt-get install rake
+** activate spi module in rasp-config
+** grow partition in rasp-config
+
