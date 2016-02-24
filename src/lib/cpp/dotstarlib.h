@@ -23,8 +23,8 @@ class Exception {
   std::string fMsg;
 };
 
-/*
-  #include <sys/types.h>
+
+#include <sys/types.h>
   #include <sys/stat.h>
   #include <fcntl.h>
   #include <sys/ioctl.h>
@@ -95,12 +95,11 @@ class Exception {
   };
 
 
-*/
 #include <cstring>
 
 class DotStarStrip {
  public:
- DotStarStrip(const uint32_t nrOfPixels) : fNrOfPixels(nrOfPixels)/*, fSpi()*/ {
+ DotStarStrip(const uint32_t nrOfPixels) : fNrOfPixels(nrOfPixels), fSpi() {
     fPixels = new unsigned char[fNrOfPixels*4];
     memset(fPixels, 0, fNrOfPixels*4);
     for (uint32_t i=0; i<fNrOfPixels; ++i) {
@@ -118,13 +117,13 @@ class DotStarStrip {
   }
 
   DotStarStrip& refresh() {
-    //fSpi.write(fPixels, fNrOfPixels);
+    fSpi.write(fPixels, fNrOfPixels);
     return *this;
   }
 private:
   uint32_t fNrOfPixels;
   unsigned char* fPixels;
-  //Spi fSpi;
+  Spi fSpi;
 };
 
 
