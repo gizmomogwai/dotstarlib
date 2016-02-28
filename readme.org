@@ -2,5 +2,6 @@
 ** sudo apt-get install rake
 ** activate spi module in rasp-config
 ** grow partition in rasp-config
-** gem install rice rake-compiler
+** gem install rice rake-compiler build-essential
+** install rvm and ruby 2.3.0
 
