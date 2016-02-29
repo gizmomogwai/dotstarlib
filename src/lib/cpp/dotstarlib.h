@@ -120,7 +120,7 @@ class DotStarStrip {
     fSpi.write(fPixels, fNrOfPixels);
     return *this;
   }
-private:
+ private:
   uint32_t fNrOfPixels;
   unsigned char* fPixels;
   Spi fSpi;

@@ -8,4 +8,4 @@ Rake::ExtensionTask.new do |ext|
   ext.source_pattern = "*.{cpp}"
 end
 
-task :default => "run"
+#task :default => "run"
