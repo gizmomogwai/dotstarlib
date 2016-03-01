@@ -19,7 +19,7 @@ end
 class Pulse
   MAX = 0.08
   def initialize
-    @delta = 0.001
+    @delta = 0.002
     @pulse = 0.0
   end
   def next
@@ -47,6 +47,14 @@ class Pulse
   end
 end
 
+GREEN = 0xff00ff00
+RED = 0xff0000ff
+BLUE = 0xffff0000
+PINK = 0xffff00ff
+GREY = 0xff707070
+DARK_GREY = 0xff303030
+ORANGE = 0xffffa500
+
 class Job
   attr_reader :name, :status, :in_progress
   def initialize(name, status, in_progress)
@@ -59,14 +67,18 @@ class Job
   end
   def to_color
     status2color = {
-      :ok => 0xff00ff00,
-      :broken => 0xff0000ff,
-      :disabled => 0xffff0000
+      :ok => GREEN,
+      :broken => RED,
+      :disabled => BLUE,
+      :machine => PINK,
+      :aborted => GREY,
+      :unstable => ORANGE,
+      :not_built => DARK_GREY
     }
     res = status2color[@status]
     if !res
       puts "unknown status #{@status}"
-      res = 0xff00ffff
+      res = 0xffffff00
     end
     return res
   end
@@ -84,9 +96,18 @@ COLOR_TO_STATUS = {'blue' => :ok,
                    'red' => :broken,
                    'blue_anime' => :ok,
                    'red_anime' => :broken,
-                   'disabled' => :disabled}
+                   'disabled' => :disabled,
+                   'aborted' => :aborted,
+                   'yellow' => :unstable,
+                   'notbuilt' => :not_built
+                  }
 def color2status(color)
-  return COLOR_TO_STATUS[color]
+  color = color.split('_').first
+  res = COLOR_TO_STATUS[color]
+  if res == nil
+    puts "unknown color #{color}"
+  end
+  res
 end
 
 def color2progress(color)
@@ -100,7 +121,9 @@ pixels = [
   Pixel.new('bdc-klocwork'),
   Pixel.new('server-monitor'),
   Pixel.new('LabNotes-Sync'),
-  Pixel.new('Ubitricity')
+  Pixel.new('Ubitricity'),
+  Pixel.new('@jenkins'),
+  Pixel.new('@cgw3')
 ]
 
 queue = Queue.new
@@ -117,12 +140,17 @@ end
 Thread.new do
   while true
     begin
-      (get_jobs('jenkins') + get_jobs('cgw3')).each do |job|
+      jenkins_jobs = get_jobs('jenkins')
+      cgw3_jobs = get_jobs('cgw3')
+      all_jobs = jenkins_jobs + cgw3_jobs
+      all_jobs.each do |job|
         pixel = pixels.find{|p|p.name == job.name}
         if pixel
           queue.push({:pixel => pixel, :job => job})
         end
       end
+      queue.push({:pixel => pixels[-2], :job => Job.new('@jenkins', :machine, jenkins_jobs.find{|j|j.in_progress} != nil)})
+      queue.push({:pixel => pixels[-1], :job => Job.new('@cgw3', :machine, cgw3_jobs.find{|j|j.in_progress} != nil)})
       GC.start
       sleep(2)
     rescue Exception => e
@@ -165,8 +193,6 @@ end
 #})
 
 strip = DotStarStrip.new(60)
-pulse = 0
-delta = 1
 
 pulse = Pulse.new
 while true
@@ -183,7 +209,7 @@ while true
     end
   end
   strip.refresh
-  sleep(0.005)
+  sleep(1.0 / 30.0)
 end
 
 while Thread.list.size > 1
