@@ -117,6 +117,8 @@ end
 
 pixels = [
   Pixel.new('audi-cgw'),
+  Pixel.new('audi-cgw-native'),
+  Pixel.new('huawei-kernel'),
   Pixel.new('AudiDataCollector'),
   Pixel.new('bdc-klocwork'),
   Pixel.new('server-monitor'),
@@ -205,7 +207,7 @@ while true
   pixels.each_with_index do |pixel, index|
     job = pixel.job
     if job
-      strip.set_pixel(index * 3, pulse.apply_to(job))
+      strip.set_pixel((index+1) * 2, pulse.apply_to(job))
     end
   end
   strip.refresh
