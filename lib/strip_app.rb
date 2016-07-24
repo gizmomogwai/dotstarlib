@@ -1,9 +1,11 @@
-require 'sinatra'
+require 'json'
 
-require 'filters.rb'
+require 'sinatra'
+require 'dotstarlib'
 
 get '/filters' do
-  "Hello World"
+  DotStarLib::Filter.filters.inject({}) { |memo, data|
+    memo[data.first] = data[1][:params]
+    memo
+  }.to_json
 end
-
-post '
