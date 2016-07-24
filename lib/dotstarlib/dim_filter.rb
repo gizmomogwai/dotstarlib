@@ -16,6 +16,7 @@ module DotStarLib
     end
     def set(params)
       @factor = params[:factor]
+      return self
     end
     register("Dim", [:factor])
   end
