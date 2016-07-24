@@ -1,5 +1,5 @@
 #require 'rbtrace'
-require 'rx_ruby'
+#require 'rx_ruby'
 require 'net/http'
 require 'json'
 require 'dotstar'
