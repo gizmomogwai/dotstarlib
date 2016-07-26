@@ -7,8 +7,8 @@ module DotStarLib
     def self.filters
       @@filters
     end
-    def process(data)
-      raise 'process(data) not implemented'
+    def process(channels)
+      raise 'process(channels) not implemented'
     end
     def set(params)
       raise 'set(params) not implemented'

@@ -13,7 +13,7 @@ describe DotStarLib::DimFilter do
   it 'should dim data' do
     cf = DotStarLib::DimFilter.new
     cf.set(factor: 127)
-    expect(cf.process([0xff0000,0x00ff00,0x0000ff])).to eq([0x7f0000,0x007f00,0x00007f])
+    expect(cf.process([[0xff0000,0x00ff00,0x0000ff]])).to eq([[0x7f0000,0x007f00,0x00007f]])
   end
 
   it 'should register itself' do

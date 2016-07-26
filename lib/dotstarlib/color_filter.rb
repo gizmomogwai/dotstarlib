@@ -2,8 +2,9 @@ require 'dotstarlib/filters'
 
 module DotStarLib
   class ColorFilter < Filter
-    def process(data)
-      return Array.new(data.length, @color)
+    def process(channels)
+      data = channels.first
+      return [Array.new(data.length, @color)]
     end
     def set(params)
       @color = params[:color]

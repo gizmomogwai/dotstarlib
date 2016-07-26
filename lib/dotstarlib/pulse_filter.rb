@@ -7,14 +7,14 @@ module DotStarLib
       @state = 0
       @direction = 1
     end
-    def process(data)
+    def process(channels)
       new_state = @state + @speed * @direction
       if new_state > 255 || new_state < 0
         @direction = -@direction
         new_state = @state + @speed * @direction
       end
       @state = new_state
-      return @dim_filter.set({factor: @state}).process(data)
+      return @dim_filter.set({factor: @state}).process(channels)
     end
 
     def set(params)
