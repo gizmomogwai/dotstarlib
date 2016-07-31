@@ -3,16 +3,12 @@ require 'dotstarlib/filters'
 module DotStarLib
   class SinFilter < Filter
     def process(channels)
-      require 'pp'
-      pp channels
-      s = channels.first.length
-      puts channels.size
-      puts s
+      size = channels.first.length
+      fSize = Float(size)
       channels.map {|c|
-        puts s
-        a = Array.new(s)
-        for i in 0...s
-          a[i] = Math::sin(Float(i) / s * 2 * Math::PI * @frequency)
+        a = Array.new(size)
+        for i in 0...size
+          a[i] = Math::sin(Float(i) / fSize * 2.0 * Math::PI * @frequency)
         end
         a
       }
