@@ -8,7 +8,6 @@ Rake::ExtensionTask.new do |ext|
   ext.source_pattern = "*.{cpp}"
 end
 
-
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 
@@ -16,4 +15,8 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
 
-#task :default => "run"
+desc 'compile native testprogram'
+task :compile_test do
+  sh "g++ -std=c++11 -Isrc/lib/cpp src/main/cpp/main.cpp -o test.exe"
+end
+

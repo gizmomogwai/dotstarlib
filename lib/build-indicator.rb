@@ -1,5 +1,4 @@
 #require 'rbtrace'
-#require 'rx_ruby'
 require 'net/http'
 require 'json'
 require 'dotstar'
@@ -17,7 +16,7 @@ class Pixel
 end
 
 class Pulse
-  MAX = 0.08
+  MAX = 0.04
   def initialize
     @delta = 0.002
     @pulse = 0.0
@@ -116,17 +115,17 @@ end
 
 
 pixels = [
+  Pixel.new('backup configs to git'),
+  Pixel.new('backup-configs'),
   Pixel.new('audi-cgw'),
   Pixel.new('audi-cgw-native'),
   Pixel.new('huawei-kernel'),
   Pixel.new('AudiDataCollector'),
   Pixel.new('bdc-klocwork'),
   Pixel.new('server-monitor'),
-  Pixel.new('LabNotes-Sync'),
-  Pixel.new('Ubitricity'),
   Pixel.new('@jenkins'),
   Pixel.new('@cgw3')
-]
+]*6
 
 queue = Queue.new
 
@@ -207,7 +206,7 @@ while true
   pixels.each_with_index do |pixel, index|
     job = pixel.job
     if job
-      strip.set_pixel((index+1) * 2, pulse.apply_to(job))
+      strip.set_pixel((index+1), pulse.apply_to(job))
     end
   end
   strip.refresh
