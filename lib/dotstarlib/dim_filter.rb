@@ -3,15 +3,17 @@ require 'dotstarlib/filters'
 module DotStarLib
   class DimFilter < Filter
     attr_accessor :factor
-    def dim_channel(c, factor)
-      return (c * factor) / 0xff
+    def dim(v, factor)
+      return (v * factor) / 0xff
     end
-    def process(channels)
-      return channels.map { |channel|
-        channel.map {|c|
-          dim_channel(c, @factor)
-        }
+    def dim_value(v, factor)
+      return Value.new(dim(v.red, factor), dim(v.green, factor), dim(v.blue, factor))
+    end
+    def process(channel)
+      c = channel.values.map { |value|
+        dim_value(value, @factor)
       }
+      return Channel.new(c)
     end
     def set(params)
       @factor = params[:factor]
