@@ -1,4 +1,3 @@
-#require 'rbtrace'
 require 'net/http'
 require 'json'
 require 'dotstar'
@@ -114,18 +113,10 @@ def color2progress(color)
 end
 
 
-pixels = [
-  Pixel.new('backup configs to git'),
-  Pixel.new('backup-configs'),
-  Pixel.new('audi-cgw'),
-  Pixel.new('audi-cgw-native'),
-  Pixel.new('huawei-kernel'),
-  Pixel.new('AudiDataCollector'),
-  Pixel.new('bdc-klocwork'),
-  Pixel.new('server-monitor'),
-  Pixel.new('@jenkins'),
-  Pixel.new('@cgw3')
-]*6
+config = ARGV[0] || 'default.rb'
+require_relative config
+pixels = use_pixels
+puts "working with #{pixels}"
 
 queue = Queue.new
 
