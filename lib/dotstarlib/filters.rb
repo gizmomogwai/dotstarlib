@@ -12,6 +12,12 @@ module DotStarLib
     def state
       return [@red, @green, @blue]
     end
+    def add(v)
+      return Value.new(@red + v.red, @green + v.green, @blue + v.blue)
+    end
+    def to_s
+      "#{@red}, #{@green}, #{@blue}"
+    end
   end
 
   class Channel

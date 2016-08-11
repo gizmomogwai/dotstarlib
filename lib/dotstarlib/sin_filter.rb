@@ -2,21 +2,29 @@ require 'dotstarlib/filters'
 
 module DotStarLib
   class SinFilter < Filter
-    def process(channels)
-      size = channels.first.length
-      fSize = Float(size)
-      channels.map {|c|
-        a = Array.new(size)
-        for i in 0...size
-          a[i] = Math::sin(Float(i) / fSize * 2.0 * Math::PI * @frequency)
-        end
-        a
-      }
+    def initialize
+      @phase = 0
     end
+
+    def process(channel)
+      @phase += @speed
+      size = channel.size
+      f_size = Float(size)
+
+      values = (0...size).map {|i|
+        v = (Math::sin(Float(i + @phase) / f_size * 2.0 * Math::PI * @frequency) + 1) * 127
+        Value.new(v, v, v)
+      }
+      return Channel.new(values)
+    end
+
     def set(params)
-      @frequency = params[:frequency]
+      @phase = params[:phase] || 0
+      @frequency = params[:frequency] || 1
+      @speed = params[:speed] || 0
       return self
     end
-    register("Sin", [:frequency])
+
+    register("Sin", [:frequency, :speed, :phase ])
   end
 end

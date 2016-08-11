@@ -16,6 +16,6 @@ describe 'Strip App' do
   it "GET /filters should deliver all registered filters" do
     get '/filters'
     expect(last_response).to be_ok
-    expect(last_response.body).to eq("{\"Color\":[\"color\"],\"Dim\":[\"factor\"],\"Pulse\":[\"speed\"],\"Sin\":[\"frequency\"]}")
+    expect(last_response.body).to eq("{\"Color\":[\"color\"],\"Dim\":[\"factor\"],\"Pulse\":[\"speed\"],\"Sin\":[\"frequency\",\"speed\",\"phase\"]}")
   end
 end
