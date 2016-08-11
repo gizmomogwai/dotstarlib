@@ -51,6 +51,23 @@ int main(int argc, char** args) {
     return 0;
     int delta = 1;
     int g = 0;
+    int i2 = 0;
+    int i1 = 0;
+    int i = 0;
+    while (true) {
+      i2 = i1;
+      i1 = i;
+      ++i;
+      if (i > nrOfLeds) {
+	i = 0;
+      }
+      
+      strip.setPixel(i2, 0x000000);
+      strip.setPixel(i1, 0x7f007f);
+      strip.setPixel(i, 0x007f00);
+      strip.refresh();
+      usleep(10000);
+    }
     while (true) {
       g += delta;
       if (g == 255) {
