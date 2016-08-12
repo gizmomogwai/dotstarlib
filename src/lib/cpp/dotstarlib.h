@@ -120,6 +120,7 @@ class DotStarStrip {
     fSpi.write(fPixels, fNrOfPixels);
     return *this;
   }
+
   uint32_t size() {
     return fNrOfPixels;
   }

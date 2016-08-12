@@ -19,3 +19,8 @@ desc 'compile native testprogram'
 task :compile_test do
   sh "g++ -std=c++11 -Isrc/lib/cpp src/main/cpp/main.cpp -o test.exe"
 end
+
+desc 'compile native off'
+task :compile_off do
+  sh "g++ -std=c++11 -Isrc/lib/cpp src/main/cpp/off.cpp -o off.exe"
+end
