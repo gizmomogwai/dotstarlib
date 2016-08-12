@@ -3,3 +3,5 @@ tmp
 lib/dotstar.bundle
 *~
 *.exe
+.bundle
+/lib/dotstar.so
