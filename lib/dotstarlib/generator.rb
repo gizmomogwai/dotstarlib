@@ -1,7 +1,7 @@
 module DotStarLib
   class Value
     attr_accessor :red, :green, :blue
-    def initialize(r, g, b)
+    def initialize(r, g=0, b=0)
       @red = r
       @green = g
       @blue = b
@@ -14,6 +14,20 @@ module DotStarLib
     end
     def add(v)
       return Value.new(@red + v.red, @green + v.green, @blue + v.blue)
+    end
+    def multiply(v)
+      return Value.new(@red * v.red, @green * v.green, @blue * v.blue)
+    end
+    def multiply_with_scalar(s)
+      return Value.new(@red * s, @green * s, @blue * s)
+    end
+    def clamp_one(v)
+      return 255 if v > 255
+      return 0 if v < 0
+      return v
+    end
+    def clamp
+      return Value.new(clamp_one(@red), clamp_one(@green), clamp_one(@blue))
     end
     def to_s
       "#{@red}, #{@green}, #{@blue}"
@@ -37,14 +51,7 @@ module DotStarLib
     
   end
 
-  class Filter
-    @@filters = {}
-    def self.register(name, params)
-      @@filters[name] = {clazz: self, params: params}
-    end
-    def self.filters
-      @@filters
-    end
+  class Generator
     def process(channel)
       raise 'process(channels) not implemented'
     end

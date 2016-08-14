@@ -3,6 +3,9 @@ require 'fox16/colors'
 include Fox
 include Responder
 
+require 'dotstarlib'
+include DotStarLib
+
 describe 'something' do
   it 'should light up' do
     app = FXApp.new
@@ -82,28 +85,21 @@ describe 'something' do
     
     Thread.new {
       begin
-        filters = Array.new
-        sin1 = DotStarLib::SinFilter.new.set(phase: 10, frequency: 1.5, speed: 0)
-        sin2 = DotStarLib::SinFilter.new.set(phase: 20, frequency: 4.3, speed: -1.7)
-        sin3 = DotStarLib::SinFilter.new.set(phase: 30, frequency: 2.1, speed: 5)
-        sin4 = DotStarLib::SinFilter.new.set(frequency: 7, speed: -3.2)
-        sin5 = DotStarLib::SinFilter.new.set(frequency: 3, speed: -2.1)
-        sin6 = DotStarLib::SinFilter.new.set(frequency: 1, speed: 2.7)
-        sin6 = DotStarLib::SinFilter.new.set(frequency: 1, speed: 2) 
-        filters << DotStarLib::SumFilter.new([
-                                               sin1,
-                                               sin2,
-                                               sin3,
-                                               sin4,
-                                               sin5,
-                                               sin6
+        sin1 = SinGenerator.new(led_strip.size).set(phase: 0, frequency: 1, speed: 0)
+        sin2 = SinGenerator.new(led_strip.size).set(phase: 0, frequency: 2, speed: 0)
+        sum = SumGenerator.new([
+                                 sin1,
+                                 sin2,
+                                 sin3,
+                                 sin4,
+                                 sin5,
+                                 sin6
                                              ])
-        filters << DotStarLib::DimFilter.new.set(factor: 32)
-        
+        a = sum
+        color = ColorizeGenerator.new(a, Value.new(255, 255, 0))
+        clamp = ClampGenerator.new(color)
         while true
-          channel = filters.reduce(Channel.new(Array.new(led_strip.size, Value.new(0,0,0)))) { |data, filter|
-            filter.process(data)
-          }
+          channel = clamp.process(nil)
           for i in 0...channel.size
             v = channel.values[i]
             led_strip.set_pixel(i, [255, v.red].min, [255, v.green].min, [255, v.blue].min)
@@ -113,6 +109,7 @@ describe 'something' do
         end
       rescue => e
         puts e
+        puts e.backtrace
       end
     }
     
