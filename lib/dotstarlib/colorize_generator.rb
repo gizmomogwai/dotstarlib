@@ -14,6 +14,7 @@ module DotStarLib
     end
 
     def set(params)
+      puts "ColorizeGenerator.set(#{params})"
       @value = params[:value] || Value.new(1.0, 0.0, 0.0)
       return self
     end

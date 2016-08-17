@@ -21,6 +21,14 @@ module DotStarLib
     def multiply_with_scalar(s)
       return Value.new(@red * s, @green * s, @blue * s)
     end
+    def self.from_i(i)
+      return Value.new(i & 0xff,
+                       (i >> 8) & 0xff,
+                       (i >> 16) & 0xff)
+    end
+    def to_i
+      Integer(@blue) << 16 | Integer(@green) << 8 | Integer(@red)
+    end
     def clamp_one(v)
       return 255 if v > 255
       return 0 if v < 0

@@ -2,11 +2,10 @@ require 'json'
 
 require 'sinatra/base'
 require 'byebug'
-#require 'dotstarlib'
+require 'dotstarlib'
+include DotStarLib
 #require 'dotstar'
-
-
-
+require 'dotstarsimulator'
 
 class Handler
   def initialize(count)
@@ -43,28 +42,178 @@ class AddHandler
   end
 end
 
-class App < Sinatra::Base
+class LedControl
   def initialize
-    puts "init app"
-    @presets = []
-    @presets << Preset.new()
+    @led_strip = DotStarStrip.new(120)
+    @queue = Queue.new
+    @current_preset = Off.new
+    Thread.new do
+      while true
+        begin
+          msg = @queue.pop
+          if msg[:preset]
+            @current_preset.stop if @current_preset
+            @current_preset = msg[:preset]
+            @current_preset.start(@led_strip)
+          end
+
+          if msg[:params]
+            @current_preset.set(msg[:params]) if @current_preset
+          end
+        rescue => e
+          puts e
+          puts e.backtrace
+        end
+      end
+    end
+  end
+  def set_preset(preset)
+    @queue.push({preset: preset})
+  end
+  def set_params(params)
+    @queue.push({params: params})
+  end
+end
+
+class Off
+  def name
+    return "Off"
+  end
+  def parameters
+    return []
+  end
+  def set(params)
+  end
+  def start(led_strip)
+    puts "starting off"
+    for i in 0...led_strip.size
+      led_strip.set_pixel(i, 0)
+    end
+    led_strip.refresh
+  end
+  def stop
+    puts "stopping off"
+    # nothing todo
+  end
+end
+
+class Puller
+  def initialize(generator, led_strip)
+    @generator = generator
+    @led_strip = led_strip
+    @finished = false
+    @thread = Thread.new {
+      run
+    }
+  end
+
+  def run
+    begin
+      while !@finished
+        channel = @generator.process(nil)
+        for i in 0...channel.size
+          v = channel.values[i]
+          @led_strip.set_pixel(i, v.to_i)
+        end
+        @led_strip.refresh
+        sleep 0.01
+      end
+    rescue => e
+      puts e
+      puts e.backtrace
+    end
+  end
+    
+  def stop_it
+    @finished = true
+    @thread.join
+  end
+  
+end
+
+class Sinuses
+  def initialize
+  end
+  def name
+    return "Sinuses"
+  end
+  def parameters
+    return [:color]
+  end
+  def set(data)
+    @color.set({value: data[:color]}) if @color
+  end
+  def start(led_strip)
+    puts "starting sinuses"
+    size = led_strip.size
+    sin1 = SinGenerator.new(size).set(phase: 10, frequency: 1.5, speed: 1)
+    sin2 = SinGenerator.new(size).set(phase: 20, frequency: 4.3, speed: 0.9)
+    sin3 = SinGenerator.new(size).set(phase: 30, frequency: 2.1, speed: 0.5)
+    sin4 = SinGenerator.new(size).set(frequency: 7, speed: -3.2)
+    sin5 = SinGenerator.new(size).set(frequency: 3, speed: -2.1)
+    sin6 = SinGenerator.new(size).set(frequency: 1, speed: 2.7)
+    sum = SumGenerator.new([
+                             sin1,
+#                             sin2,
+#                             sin3,
+#                             sin4,
+#                             sin5,
+#                             sin6
+                           ])
+    @color = ColorizeGenerator.new(sum, Value.new(0, 255, 0))
+    @generator = ClampGenerator.new(@color)
+    @puller = Puller.new(@generator, led_strip)
+  end
+  def stop
+    puts "stopping sinuses"
+    @puller.stop_it if @puller
+  end
+end
+
+class App < Sinatra::Base
+  def initialize()
+    super()
+    puts "initialize: #{self}"
+    @presets = Array.new
+    @presets << Off.new
+    @presets << Sinuses.new
+    @led_control = LedControl.new
   end
 
   get '/presets' do
+    puts self
+    puts "presets: #{@presets}"
+    @presets.each_with_index.map {|i, index|
+      {
+        id: index,
+        name: i.name,
+        parameters: i.parameters
+      }.to_json
+    }
   end
 
-  post '/activate/:id' do
+  post '/activate' do
+    begin
+      puts params
+      preset = @presets[Integer(params['id'])]
+      @led_control.set_preset(preset)
+    rescue => e
+      puts e.backtrace
+      puts e
+    end
   end
 
-  post '/set/:id' do
+  post '/set' do
+    puts params
+    @led_control.set_params(params)
   end
-  
-  get '/filters' do
-    DotStarLib::Filter.filters.sort.inject({}) { |memo, data|
-      memo[data.first] = data[1][:params]
-      memo
-    }.to_json
-  end
+#  
+#  get '/filters' do
+#    DotStarLib::Filter.filters.sort.inject({}) { |memo, data|
+#      memo[data.first] = data[1][:params]
+#      memo
+#    }.to_json
+##  end
 
   #get '/reset' do
   #  reset!
@@ -75,7 +224,6 @@ class App < Sinatra::Base
   #    end
   #  end
   #end
-  
   run!
 end
 
