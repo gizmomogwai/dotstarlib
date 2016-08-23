@@ -6,3 +6,7 @@ lib/dotstar.bundle
 .bundle
 /lib/dotstar.so
 build
+.gradle
+.idea
+*.ipr
+*.iws
