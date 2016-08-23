@@ -51,9 +51,14 @@ class LedControl
         begin
           msg = @queue.pop
           if msg[:preset]
-            if @current_preset
-              puts "stopping '#{@current_preset.name}'" 
-              @current_preset.stop
+            begin
+              if @current_preset
+                puts "stopping '#{@current_preset.name}'" 
+                @current_preset.stop
+              end
+            rescue => e
+              puts e.message
+              puts e.backtrace
             end
             @current_preset = msg[:preset]
             puts "starting '#{@current_preset.name}'"
@@ -143,7 +148,7 @@ class Sinuses
     return "Sinuses"
   end
   def parameters
-    return [:color]
+    return [{type: :color, name: :color}]
   end
   def set(data)
     @color.set({value: data[:color]}) if @color
@@ -199,6 +204,7 @@ class Pusher
   end
 end
 
+
 class Midi
   def initialize
     @queue = Queue.new
@@ -208,15 +214,15 @@ class Midi
     "Midi"
   end
   def parameters
-    return [:ip_with_port]
+    return [{type: :string, name: :ip_with_port}, {type: :color, name: :color}]
   end
-  def set
-    raise 'nyi'
+  def set(data)
+    @color.set({value: data[:color]}) if @color
   end
   def start(led_strip)
     midi_generator = MidiGenerator.new(led_strip.size)
-    color = ColorizeGenerator.new(midi_generator, Value.new(0, 255, 0))
-    generator = ClampGenerator.new(color)
+    @color = ColorizeGenerator.new(midi_generator, Value.new(0, 255, 0))
+    generator = ClampGenerator.new(@color)
 
     ip, port = @ip_and_port.split(':')
     port = Integer(port)
@@ -247,8 +253,6 @@ class App < Sinatra::Base
   end
 
   get '/presets' do
-    puts self
-    puts "presets: #{@presets}"
     @presets.each_with_index.map {|i, index|
       {
         id: index,
