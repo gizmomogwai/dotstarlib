@@ -4,8 +4,8 @@ require 'sinatra/base'
 require 'byebug'
 require 'dotstarlib'
 include DotStarLib
-#require 'dotstar'
-require 'dotstarsimulator'
+require 'dotstar'
+#require 'dotstarsimulator'
 
 class Handler
   def initialize(count)
@@ -132,8 +132,6 @@ class Puller
 end
 
 class Sinuses
-  def initialize
-  end
   def name
     return "Sinuses"
   end
@@ -170,6 +168,35 @@ class Sinuses
   end
 end
 
+
+def Midi
+  def initialize
+    @ip_and_port = "192.168.0.181:55556"
+  end
+  def name
+    "Midi"
+  end
+  def parameters
+    return [:ip_with_port]
+  end
+  def set
+    raise 'nyi'
+  end
+  def start(led_strip)
+    ip, port = @ip_and_port.split(':')
+    port = Integer(port)
+    s = TCPSocket.new(ip, port)
+    while !finished
+      pitch = s.getc
+      velocity = s.getc
+      led_strip.set_pixel(Integer(pitch), velocity)
+      led_strip.refresh
+    end
+  end
+  def stop
+  end
+end
+
 class App < Sinatra::Base
   def initialize()
     super()
@@ -177,6 +204,7 @@ class App < Sinatra::Base
     @presets = Array.new
     @presets << Off.new
     @presets << Sinuses.new
+    @presets << Midi.new
     @led_control = LedControl.new
   end
 
