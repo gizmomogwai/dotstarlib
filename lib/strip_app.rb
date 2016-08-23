@@ -1,5 +1,4 @@
 require 'json'
-
 require 'sinatra/base'
 require 'byebug'
 require 'dotstarlib'
@@ -198,6 +197,7 @@ def Midi
 end
 
 class App < Sinatra::Base
+  set :bind, "0.0.0.0"
   def initialize()
     super()
     puts "initialize: #{self}"
@@ -216,8 +216,8 @@ class App < Sinatra::Base
         id: index,
         name: i.name,
         parameters: i.parameters
-      }.to_json
-    }
+      }
+    }.to_json
   end
 
   post '/activate' do
