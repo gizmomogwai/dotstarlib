@@ -51,8 +51,12 @@ class LedControl
         begin
           msg = @queue.pop
           if msg[:preset]
-            @current_preset.stop if @current_preset
+            if @current_preset
+              puts "stopping '#{@current_preset.name}'" 
+              @current_preset.stop
+            end
             @current_preset = msg[:preset]
+            puts "starting '#{@current_preset.name}'"
             @current_preset.start(@led_strip)
           end
 
@@ -96,6 +100,15 @@ class Off
   end
 end
 
+def update_strip(generator, led_strip)
+  channel = generator.process(nil)
+  for i in 0...channel.size
+    v = channel.values[i]
+    led_strip.set_pixel(i, v.to_i)
+  end
+  led_strip.refresh
+end
+
 class Puller
   def initialize(generator, led_strip)
     @generator = generator
@@ -109,12 +122,7 @@ class Puller
   def run
     begin
       while !@finished
-        channel = @generator.process(nil)
-        for i in 0...channel.size
-          v = channel.values[i]
-          @led_strip.set_pixel(i, v.to_i)
-        end
-        @led_strip.refresh
+        update_strip(@generator, @led_strip)
         sleep 0.01
       end
     rescue => e
@@ -167,10 +175,34 @@ class Sinuses
   end
 end
 
+class Pusher
+  def initialize(&block)
+    @block = block
+    @finished = false
+    @thread = Thread.new {
+      run
+    }
+  end
+  def run
+    while !@finished
+      begin
+        @block.call
+      rescue => e
+        puts e.message
+        puts e.backtrace
+      end
+    end
+  end
+  def stop
+    @finished = true
+    @thread.join
+  end
+end
 
-def Midi
+class Midi
   def initialize
-    @ip_and_port = "192.168.0.181:55556"
+    @queue = Queue.new
+    @ip_and_port = "192.168.0.181:55554"
   end
   def name
     "Midi"
@@ -182,17 +214,23 @@ def Midi
     raise 'nyi'
   end
   def start(led_strip)
+    midi_generator = MidiGenerator.new(led_strip.size)
+    color = ColorizeGenerator.new(midi_generator, Value.new(0, 255, 0))
+    generator = ClampGenerator.new(color)
+
     ip, port = @ip_and_port.split(':')
     port = Integer(port)
-    s = TCPSocket.new(ip, port)
-    while !finished
-      pitch = s.getc
-      velocity = s.getc
-      led_strip.set_pixel(Integer(pitch), velocity)
-      led_strip.refresh
-    end
+    @socket = TCPSocket.new(ip, port)
+    
+    @pusher = Pusher.new() {
+      pitch, velocity = @socket.read(2).unpack('C C')
+      midi_generator.update(pitch, velocity)
+      update_strip(generator, led_strip)
+    }
   end
   def stop
+    @socket.close
+    @pusher.stop
   end
 end
 
