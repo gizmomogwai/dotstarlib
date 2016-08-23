@@ -270,7 +270,7 @@ class App < Sinatra::Base
   end
 
   post '/set' do
-    puts params
+    puts "set parameters: #{params}"
     @led_control.set_params(params)
   end
 #  

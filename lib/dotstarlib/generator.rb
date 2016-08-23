@@ -21,10 +21,10 @@ module DotStarLib
     def multiply_with_scalar(s)
       return Value.new(@red * s, @green * s, @blue * s)
     end
-    def self.from_i(i)
-      return Value.new(i & 0xff,
+    def self.from_int(i)
+      return Value.new((i >> 16) & 0xff,
                        (i >> 8) & 0xff,
-                       (i >> 16) & 0xff)
+                       (i >> 0) & 0xff)
     end
     def to_i
       Integer(@blue) << 16 | Integer(@green) << 8 | Integer(@red)
