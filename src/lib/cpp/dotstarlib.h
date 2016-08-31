@@ -94,7 +94,6 @@ class Spi {
   struct spi_ioc_transfer fXfer[3];
 };
 
-
 #include <cstring>
 
 class DotStarStrip {
