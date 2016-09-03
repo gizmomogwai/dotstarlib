@@ -3,7 +3,8 @@ require 'sinatra/base'
 require 'byebug'
 require 'dotstarlib'
 include DotStarLib
-require 'dotstar'
+require 'dnssd'
+#require 'dotstar'
 #require 'dotstarsimulator'
 
 class Handler
@@ -204,6 +205,24 @@ class Pusher
   end
 end
 
+class CKJenkins
+  def name
+    "CKJenkins"
+  end
+  def parameters
+    return []
+  end
+  def set(data)
+  end
+  def start(led_strip)
+    @generator = JenkinsGenerator.new(led_strip.size, ['cgw3'], ['audi-cgw', 'huawei-kernel'], Pulse.new)
+    @puller = Puller.new(@generator, led_strip)
+  end
+  def stop
+    puts "stopping sinuses"
+    @puller.stop_it if @puller
+  end
+end
 
 class Midi
   def initialize
@@ -240,6 +259,17 @@ class Midi
   end
 end
 
+class MyTcpSocket < TCPSocket
+  def initialize(bind)
+    @addr = bind
+  end
+  def port
+    return 4567
+  end
+  def addr
+    return [nil, @addr]
+  end
+end
 class App < Sinatra::Base
   set :bind, "0.0.0.0"
   def initialize()
@@ -249,10 +279,12 @@ class App < Sinatra::Base
     @presets << Off.new
     @presets << Sinuses.new
     @presets << Midi.new
+    @presets << CKJenkins.new
     @led_control = LedControl.new
   end
 
   get '/presets' do
+    byebug
     @presets.each_with_index.map {|i, index|
       {
         id: index,
@@ -294,7 +326,9 @@ class App < Sinatra::Base
   #    end
   #  end
   #end
-  run!
+  run! do |server|
+    @announce = DNSSD.register('wohnzimmer', "_dotstar._tcp", nil, 4567)
+  end
 end
 
 #STRIP_SIZE = 1
