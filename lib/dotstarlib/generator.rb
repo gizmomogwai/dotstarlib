@@ -56,7 +56,9 @@ module DotStarLib
     def state
       return @values
     end
-    
+    def to_s
+      @values.join(', ')
+    end
   end
 
   class Generator

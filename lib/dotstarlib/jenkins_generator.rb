@@ -42,18 +42,23 @@ module DotStarLib
     attr_reader :name, :jobs, :job
     def initialize(name)
       @name = "@#{name}"
+      @last_update = Time.new(0)
     end
     def update()
       require 'json'
-      #string = Net::HTTP.get(server, '/api/json')
-      #File.write("#{server}.response", string)
-      string = File.read("#{@name[1..-1]}.response")
-      @jobs = JSON.parse(string)['jobs'].map{ |j|
-        Job.job_job(j['name'],
-                    j['color'],
-                    j['color'])
-      }
-      @job = Job.new(@name, :machine, @jobs.find{|j|j.in_progress} != nil)
+      now = Time.now
+      if now - @last_update > 10
+        string = Net::HTTP.get(@name[1..-1], '/api/json')
+        #File.write("#{server}.response", string)
+        #string = File.read("#{@name[1..-1]}.response")
+        @jobs = JSON.parse(string)['jobs'].map{ |j|
+          Job.normal_job(j['name'],
+                         j['color'],
+                         j['color'])
+        }
+        @job = Job.new(@name, :machine, @jobs.find{|j|j.in_progress} != nil)
+        @last_update = now
+      end
       return @jobs
     end
     def to_s
@@ -80,8 +85,6 @@ module DotStarLib
 
         server_jobs = @servers.map {|s|s.update()}
         all_jobs = server_jobs.flatten
-        puts "all jobs"
-        puts all_jobs
         @pixels.each do |pixel|
           # todo ... get current value of job and current value of server pixels
           pixel.job =
@@ -91,8 +94,6 @@ module DotStarLib
               }
 
               raise "could not find server for pixel #{pixel}" unless server
-              puts "servers job"
-              puts server.job
               server.job
             else
               res = all_jobs.find {|j| j.name == pixel.name}
@@ -101,9 +102,7 @@ module DotStarLib
               res
             end
         end
-
-        puts @pixels
-        return Channel.new(@pixels.map{|pixel| @pulse.apply_to(pixel.job)})
+        return Channel.new(@pixels.map{|pixel| Value.from_int(@pulse.apply_to(pixel.job)) })
       rescue => e
         puts e
         puts e.backtrace
@@ -116,12 +115,12 @@ module DotStarLib
     end
   end
   GREEN = 0xff00ff00
-  RED = 0xff0000ff
-  BLUE = 0xffff0000
+  RED = 0xffff0000
+  BLUE = 0xff0000ff
   PINK = 0xffff00ff
   GREY = 0xff707070
   DARK_GREY = 0xff303030
-  ORANGE = 0xffffa500
+  ORANGE = 0xff00a5ff
 
   class Pixel
     attr_reader :name, :index
@@ -133,7 +132,7 @@ module DotStarLib
       return @name[0] == '@'
     end
     def to_s
-      "Pixel {name=>#{name}}"
+      "Pixel {name=>#{name}, job=>#{job}}"
     end
   end
 
@@ -142,7 +141,7 @@ module DotStarLib
     def self.machine_job(name, in_progress)
       return Job.new(name, :machine, in_progress)
     end
-    def self.job_job(name, status, in_progress)
+    def self.normal_job(name, status, in_progress)
       return Job.new(name, color2status(status), color2progress(in_progress))
     end
     def initialize(name, status, in_progress)
@@ -151,7 +150,7 @@ module DotStarLib
       @in_progress = in_progress
     end
     def to_s
-      return "Job{name => #{@name}, status => #{@status}}"
+      return "Job{name => #{name}, status => #{status}, progress => #{in_progress}}"
     end
     def to_color
       status2color = {

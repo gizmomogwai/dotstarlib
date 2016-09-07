@@ -4,8 +4,13 @@ require 'byebug'
 require 'dotstarlib'
 include DotStarLib
 require 'dnssd'
-#require 'dotstar'
-#require 'dotstarsimulator'
+begin
+  require 'dotstar'
+rescue
+  puts "Warning: could not open dotstar native support => using sim"
+  require 'dotstarsimulator'
+end
+
 
 class Handler
   def initialize(count)
@@ -215,7 +220,7 @@ class CKJenkins
   def set(data)
   end
   def start(led_strip)
-    @generator = JenkinsGenerator.new(led_strip.size, ['cgw3'], ['audi-cgw', 'huawei-kernel'], Pulse.new)
+    @generator = JenkinsGenerator.new(led_strip.size, ['cgw3'], ['audi-cgw', 'audi-cgw2', 'huawei-kernel'], Pulse.new)
     @puller = Puller.new(@generator, led_strip)
   end
   def stop
@@ -327,7 +332,7 @@ class App < Sinatra::Base
   #  end
   #end
   run! do |server|
-    @announce = DNSSD.register('wohnzimmer', "_dotstar._tcp", nil, 4567)
+    @announce = DNSSD.register(File.read('location.txt'), "_dotstar._tcp", nil, 4567)
   end
 end
 
