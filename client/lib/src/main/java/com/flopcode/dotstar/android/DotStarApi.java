@@ -19,37 +19,38 @@ import java.util.concurrent.TimeUnit;
 
 public class DotStarApi {
 
-    public static DotStar createDotStar(String urlAsString) {
-        Retrofit rf = retrofitWithLogging()
-                .baseUrl(urlAsString)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return rf.create(DotStar.class);
-    }
+  public static DotStar createDotStar(String urlAsString) {
+    System.out.println("urlAsString = " + urlAsString);
+    Retrofit rf = retrofitWithLogging()
+      .baseUrl(urlAsString)
+      .addConverterFactory(GsonConverterFactory.create())
+      .build();
+    return rf.create(DotStar.class);
+  }
 
-    public static Retrofit.Builder retrofitWithLogging() {
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(Level.BODY);
-        OkHttpClient httpClient = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .connectTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(2, TimeUnit.SECONDS)
-                .writeTimeout(2, TimeUnit.SECONDS)
-                .build();
-        return new Retrofit.Builder().client(httpClient);
-    }
+  public static Retrofit.Builder retrofitWithLogging() {
+    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+    logging.setLevel(Level.BODY);
+    OkHttpClient httpClient = new OkHttpClient.Builder()
+      .addInterceptor(logging)
+      .connectTimeout(2, TimeUnit.SECONDS)
+      .readTimeout(2, TimeUnit.SECONDS)
+      .writeTimeout(2, TimeUnit.SECONDS)
+      .build();
+    return new Retrofit.Builder().client(httpClient);
+  }
 
-    interface DotStar {
-        @GET("/presets")
-        @Headers("Accept: application/json")
-        Call<List<Preset>> index();
+  interface DotStar {
+    @GET("/presets")
+    @Headers("Accept: application/json")
+    Call<List<Preset>> index();
 
-        @FormUrlEncoded
-        @POST("/activate")
-        Call<Void>  activate(@Field("id") long id);
+    @FormUrlEncoded
+    @POST("/activate")
+    Call<Void> activate(@Field("id") long id);
 
-        @FormUrlEncoded
-        @POST("/set")
-        Call<Void> set(@FieldMap Map<String, String> data);
-    }
+    @FormUrlEncoded
+    @POST("/set")
+    Call<Void> set(@FieldMap Map<String, String> data);
+  }
 }

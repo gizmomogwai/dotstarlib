@@ -1,5 +1,5 @@
 * Prerequisites
-** sudo apt-get install rake
+** sudo apt-get install rake libavahi-compat-libdnssd-dev
 ** activate spi module in rasp-config
 ** grow partition in rasp-config
 ** gem install rice rake-compiler build-essential
