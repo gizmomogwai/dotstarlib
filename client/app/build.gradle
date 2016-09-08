@@ -22,6 +22,19 @@ dependencies {
   compile 'com.android.support:recyclerview-v7:23.2.1'
   compile 'com.github.QuadFlask:colorpicker:0.0.11'
   compile 'com.jakewharton:butterknife:7.0.1'
+
+  // this should not be necessary
+  compile 'joda-time:joda-time:2.9.2'
+  compile 'com.google.guava:guava:19.0'
+  compile 'com.squareup.retrofit2:retrofit:2.1.0'
+  compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+  compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
+  compile('org.simpleframework:simple-xml:2.7.1') {
+    exclude group: 'stax', module: 'stax-api'
+    exclude group: 'xpp3', module: 'xpp3'
+  }
+  // but otherwise my idea does not take Call, Response from retrofit2
+
   compile project(':lib')
 }
 
