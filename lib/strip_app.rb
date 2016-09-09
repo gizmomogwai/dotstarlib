@@ -289,7 +289,6 @@ class App < Sinatra::Base
   end
 
   get '/presets' do
-    byebug
     @presets.each_with_index.map {|i, index|
       {
         id: index,
