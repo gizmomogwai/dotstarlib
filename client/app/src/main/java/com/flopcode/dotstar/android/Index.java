@@ -68,13 +68,11 @@ public class Index extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     final Intent intent = getIntent();
-    if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+    if (Intent.ACTION_VIEW.equals(intent.getAction())) {
       String host = intent.getStringExtra("host");
       int port = intent.getIntExtra("port", 4567);
       storeConnectionPrefs(this, "http://" + host + ":" + port);
     }
-    System.out.println("getIntent() = " + intent);
-    System.out.println("getIntent().getExtras() = " + intent.getExtras());
     setContentView(R.layout.activity_preset_list);
     bind(this);
 
@@ -84,7 +82,6 @@ public class Index extends AppCompatActivity {
     dotStar.index().enqueue(new Callback<List<Preset>>() {
       @Override
       public void onResponse(Call<List<Preset>> call, Response<List<Preset>> response) {
-        System.out.println("response = " + response);
         adapter.set(response.body());
       }
 
