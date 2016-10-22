@@ -149,9 +149,9 @@ class Puller
   
 end
 
-class Sinuses
+class Sinus1
   def name
-    return "Sinuses"
+    return "Sinus1"
   end
   def parameters
     return [{type: :color, name: :color}]
@@ -178,6 +178,37 @@ class Sinuses
                            ])
     @color = ColorizeGenerator.new(sum, Value.new(0, 255, 0))
     @generator = ClampGenerator.new(@color)
+    @puller = Puller.new(@generator, led_strip)
+  end
+  def stop
+    puts "stopping sinuses"
+    @puller.stop_it if @puller
+  end
+end
+class Sinus2
+  def name
+    return "Sinus2"
+  end
+  def parameters
+    return [
+      {type: :color, name: "color1"},
+      {type: :color, name: "color2"}
+    ]
+  end
+  def set(data)
+    puts "setting parameters: #{data}"
+    @color1.set({value: data["color1"]}) if @color1 && data.include?("color1")
+    @color2.set({value: data["color2"]}) if @color2 && data.include?("color2")
+  end
+  def start(led_strip)
+    puts "starting sinuses"
+    size = led_strip.size
+    sin1 = SinGenerator.new(size).set(phase: 0, frequency: 1.0, speed: 1)
+    sin2 = SinGenerator.new(size).set(phase: 180, frequency: 2.0, speed: -1)
+    @color1 = ColorizeGenerator.new(sin1, Value.new(0, 0, 0))
+    @color2 = ColorizeGenerator.new(sin2, Value.new(255, 0, 255))
+    sum = SumGenerator.new([@color1, @color2])
+    @generator = ClampGenerator.new(sum)
     @puller = Puller.new(@generator, led_strip)
   end
   def stop
@@ -282,7 +313,8 @@ class App < Sinatra::Base
     puts "initialize: #{self}"
     @presets = Array.new
     @presets << Off.new
-    @presets << Sinuses.new
+    @presets << Sinus1.new
+    @presets << Sinus2.new
     @presets << Midi.new
     @presets << CKJenkins.new
     @led_control = LedControl.new
