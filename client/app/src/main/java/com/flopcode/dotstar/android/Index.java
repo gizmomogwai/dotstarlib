@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.Bind;
+import butterknife.BindView;
 import com.flopcode.dotstar.android.DotStarApi.DotStar;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,9 +39,9 @@ import static butterknife.ButterKnife.bind;
 public class Index extends AppCompatActivity {
 
   public static final String LOG_TAG = "DotStar";
-  @Bind(R.id.preset_list)
+  @BindView(R.id.preset_list)
   public RecyclerView list;
-  @Bind(R.id.coordinator)
+  @BindView(R.id.coordinator)
   public CoordinatorLayout coordinator;
   /**
    * Whether or not the activity is in two-pane mode, i.e. running on a tablet

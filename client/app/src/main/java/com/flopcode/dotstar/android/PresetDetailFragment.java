@@ -86,9 +86,10 @@ public class PresetDetailFragment extends Fragment {
         }
 
         private void showColorPicker() {
+          final String name = parameter.get("name");
           ColorPickerDialogBuilder
             .with(getContext())
-            .setTitle("Choose color for " + parameter.get("name"))
+            .setTitle("Choose color for " + name)
             .initialColor(0xffffffff)
             .wheelType(WHEEL_TYPE.FLOWER)
             .showAlphaSlider(false)
@@ -96,7 +97,7 @@ public class PresetDetailFragment extends Fragment {
             .setOnColorSelectedListener(new OnColorSelectedListener() {
               @Override
               public void onColorSelected(int selectedColor) {
-                Call<Void> call = getDotStar(getConnectionPrefs(getContext())).set(ImmutableMap.of("color", Integer.toHexString(selectedColor)));
+                Call<Void> call = getDotStar(getConnectionPrefs(getContext())).set(ImmutableMap.of(name, Integer.toHexString(selectedColor)));
                 call.enqueue(new Callback<Void>() {
                   @Override
                   public void onResponse(Call<Void> call, Response<Void> response) {

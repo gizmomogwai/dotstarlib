@@ -1,13 +1,16 @@
 buildscript {
   repositories {
     jcenter()
+    mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.0-beta2'
+    classpath 'com.android.tools.build:gradle:2.2.0'
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
   }
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 
 repositories {
   jcenter()
@@ -15,25 +18,17 @@ repositories {
   maven { url "https://jitpack.io" }
 }
 
+def butterknifeVersion = '8.4.0'
 dependencies {
   compile 'com.android.support:appcompat-v7:23.2.1'
   compile 'com.android.support:design:23.2.1'
   compile 'com.android.support:cardview-v7:23.2.1'
   compile 'com.android.support:recyclerview-v7:23.2.1'
-  compile 'com.github.QuadFlask:colorpicker:0.0.11'
-  compile 'com.jakewharton:butterknife:7.0.1'
 
-  // this should not be necessary
-  compile 'joda-time:joda-time:2.9.2'
-  compile 'com.google.guava:guava:19.0'
-  compile 'com.squareup.retrofit2:retrofit:2.1.0'
-  compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-  compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
-  compile('org.simpleframework:simple-xml:2.7.1') {
-    exclude group: 'stax', module: 'stax-api'
-    exclude group: 'xpp3', module: 'xpp3'
-  }
-  // but otherwise my idea does not take Call, Response from retrofit2
+  compile 'com.github.QuadFlask:colorpicker:0.0.11'
+
+  compile "com.jakewharton:butterknife:$butterknifeVersion"
+  apt "com.jakewharton:butterknife-compiler:$butterknifeVersion"
 
   compile project(':lib')
 }
@@ -48,7 +43,7 @@ def passwordFromKeychain = { name ->
 
 android {
   compileSdkVersion 23
-  buildToolsVersion '24.0.2'
+  buildToolsVersion '25.0.0'
 
   defaultConfig {
     minSdkVersion 21

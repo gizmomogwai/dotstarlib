@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-  compile 'joda-time:joda-time:2.9.2'
+  compile 'joda-time:joda-time:2.9.4'
   compile 'com.google.guava:guava:19.0'
   compile 'com.squareup.retrofit2:retrofit:2.1.0'
   compile 'com.squareup.retrofit2:converter-gson:2.1.0'
