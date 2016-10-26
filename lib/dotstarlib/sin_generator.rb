@@ -18,9 +18,11 @@ module DotStarLib
     end
 
     def set(params)
-      @phase = get(params, :phase, 0)
-      @frequency = get(params, :frequency, 1)
-      @speed = get(params, :speed, 0)
+#      puts "old: #{@phase}, #{@frequency}, #{@speed}"
+      @phase = Float(get(params, :phase, @phase))
+      @frequency = Float(get(params, :frequency, @frequency))
+      @speed = Float(get(params, :speed, @speed))
+ #     puts "new: #{@phase}, #{@frequency}, #{@speed}"
       return self
     end
 

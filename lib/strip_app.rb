@@ -149,6 +149,16 @@ class Puller
   
 end
 
+def copy_values(data, *args)
+  res = {}
+  args.each do |arg|
+    if data.include?(arg)
+      res[arg.to_sym] = data[arg]
+    end
+  end
+  return res
+end
+
 class Sinus1
   def name
     return "Sinus1"
@@ -156,16 +166,17 @@ class Sinus1
   def parameters
     return [
       {type: :color, name: "color"},
-      {type: :range, name: "frequency", min: -3, max: 3}
+      {type: :range, name: "frequency", min: 0.1, max: 3},
       {type: :range, name: "speed", min: -3, max: 3}
     ]
   end
   def set(data)
-    @color.set({value: data["color"]}) if @color
-    @sin1.set(data) if @sin1
+    @color.set({value: data["color"]}) if @color && data.include?('color')
+    d = copy_values(data, 'frequency', 'speed')
+    @sin1.set(d) if @sin1
   end
   def start(led_strip)
-    puts "starting sinuses"
+
     size = led_strip.size
     @sin1 = SinGenerator.new(size).set(phase: 10, frequency: 1.5, speed: 1)
  #   sin2 = SinGenerator.new(size).set(phase: 20, frequency: 4.3, speed: 0.9)
@@ -186,10 +197,10 @@ class Sinus1
     @puller = Puller.new(@generator, led_strip)
   end
   def stop
-    puts "stopping sinuses"
     @puller.stop_it if @puller
   end
 end
+
 class Sinus2
   def name
     return "Sinus2"
@@ -201,7 +212,6 @@ class Sinus2
     ]
   end
   def set(data)
-    puts "setting parameters: #{data}"
     @color1.set({value: data["color1"]}) if @color1 && data.include?("color1")
     @color2.set({value: data["color2"]}) if @color2 && data.include?("color2")
   end
