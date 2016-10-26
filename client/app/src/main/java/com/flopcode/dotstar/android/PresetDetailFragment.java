@@ -1,6 +1,9 @@
 package com.flopcode.dotstar.android;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -11,6 +14,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.flask.colorpicker.ColorPickerView.WHEEL_TYPE;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -74,21 +79,58 @@ public class PresetDetailFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                            Bundle savedInstanceState) {
-    ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.preset_detail, container, false);
 
-    for (final Map<String, String> parameter : getColorParameters()) {
-      final Button button = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
-      button.setText(parameter.get("name"));
-      button.setOnClickListener(new OnClickListener() {
+    ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.preset_detail, container, false);
+    for (Map<String, String> parameters : mItem.parameters) {
+      Parameter p = Parameters.get(parameters);
+      Button b = p.createButton(inflater, rootView, getContext());
+      if (b != null) {
+        rootView.addView(b);
+      }
+    }
+    return rootView;
+  }
+
+  private Iterable<Map<String, String>> getColorParameters() {
+    return filter(Arrays.asList(mItem.parameters), new Predicate<Map<String, String>>() {
+      @Override
+      public boolean apply(Map<String, String> input) {
+        return input.containsKey("type") && input.get("type").equals("color");
+      }
+    });
+  }
+
+  static abstract class Parameter {
+    public final String name;
+
+    Parameter(Map<String, String> params) {
+      if (!params.containsKey("name")) {
+        throw new IllegalArgumentException();
+      }
+      this.name = params.get("name");
+    }
+
+    public abstract Button createButton(LayoutInflater inflater, ViewGroup rootView, Context context);
+  }
+
+  private static class ColorParameter extends Parameter {
+    public ColorParameter(Map<String, String> params) {
+      super(params);
+    }
+
+    @Override
+    public Button createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
+      final Button res = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
+      res.setText(name);
+      res.setOnClickListener(new OnClickListener() {
         @Override
         public void onClick(View view) {
           showColorPicker();
         }
 
         private void showColorPicker() {
-          final String name = parameter.get("name");
           ColorPickerDialogBuilder
-            .with(getContext())
+            .with(context)
             .setTitle("Choose color for " + name)
             .initialColor(0xffffffff)
             .wheelType(WHEEL_TYPE.FLOWER)
@@ -97,7 +139,7 @@ public class PresetDetailFragment extends Fragment {
             .setOnColorSelectedListener(new OnColorSelectedListener() {
               @Override
               public void onColorSelected(int selectedColor) {
-                Call<Void> call = getDotStar(getConnectionPrefs(getContext())).set(ImmutableMap.of(name, Integer.toHexString(selectedColor)));
+                Call<Void> call = getDotStar(getConnectionPrefs(context)).set(ImmutableMap.of(name, Integer.toHexString(selectedColor)));
                 call.enqueue(new Callback<Void>() {
                   @Override
                   public void onResponse(Call<Void> call, Response<Void> response) {
@@ -127,17 +169,90 @@ public class PresetDetailFragment extends Fragment {
             .show();
         }
       });
-      rootView.addView(button);
+      return res;
     }
-    return rootView;
   }
 
-  private Iterable<Map<String, String>> getColorParameters() {
-    return filter(Arrays.asList(mItem.parameters), new Predicate<Map<String, String>>() {
-      @Override
-      public boolean apply(Map<String, String> input) {
-        return input.containsKey("type") && input.get("type").equals("color");
+  private static class RangeParameter extends Parameter {
+    public final Float min;
+    public final Float max;
+
+    public RangeParameter(Map<String, String> map) {
+      super(map);
+      min = new Float(map.get("min"));
+      max = new Float(map.get("max"));
+    }
+
+    @Override
+    public Button createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
+      final Button res = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
+      res.setText(name);
+      res.setOnClickListener(new OnClickListener() {
+        float value = min;
+
+        @Override
+        public void onClick(View view) {
+          SeekBar seekBar = new SeekBar(context);
+          seekBar.setMax((int) ((max - min) * 10));
+          final AlertDialog alertDialog = new Builder(context)
+            .setTitle(calculateTitle())
+            .setView(seekBar)
+            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+              @Override
+              public void onClick(DialogInterface dialogInterface, int i) {
+              }
+            })
+            .create();
+          alertDialog.show();
+          seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+              System.out.println("seekBar = " + seekBar);
+              value = (i / 10.0f) + min;
+              alertDialog.setTitle(calculateTitle());
+              Call<Void> call = getDotStar(getConnectionPrefs(context)).set(ImmutableMap.of(name, String.format("%.1f", value)));
+              call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                  Log.e(Index.LOG_TAG, "could set " + name);
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                  Log.e(Index.LOG_TAG, "could not set " + name, t);
+                }
+              });
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+          });
+        }
+
+        private String calculateTitle() {
+          return "Range " + name + "(" + String.format("%.1f", value) + "/" + min + " - " + max + ")";
+        }
+      });
+      return res;
+    }
+  }
+
+  static class Parameters {
+    public static Parameter get(Map<String, String> params) {
+      final String type = params.get("type");
+      if (type.equals("color")) {
+        return new ColorParameter(params);
+      } else if (type.equals("range")) {
+        return new RangeParameter(params);
       }
-    });
+      return null;
+    }
   }
 }
