@@ -18,12 +18,18 @@ module DotStarLib
     end
 
     def set(params)
-      @phase = params[:phase] || 0
-      @frequency = params[:frequency] || 1
-      @speed = params[:speed] || 0
+      @phase = get(params, :phase, 0)
+      @frequency = get(params, :frequency, 1)
+      @speed = get(params, :speed, 0)
       return self
     end
 
+    def get(params, what, default_value)
+      return params[what] if params.include?(what)
+      what = what.to_s
+      return params[what] if params.include?(what)
+      return default_value
+    end
     # register("Sin", [:frequency, :speed, :phase ])
   end
 end

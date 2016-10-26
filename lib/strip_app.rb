@@ -154,22 +154,27 @@ class Sinus1
     return "Sinus1"
   end
   def parameters
-    return [{type: :color, name: :color}]
+    return [
+      {type: :color, name: "color"},
+      {type: :range, name: "frequency", min: -3, max: 3}
+      {type: :range, name: "speed", min: -3, max: 3}
+    ]
   end
   def set(data)
-    @color.set({value: data[:color]}) if @color
+    @color.set({value: data["color"]}) if @color
+    @sin1.set(data) if @sin1
   end
   def start(led_strip)
     puts "starting sinuses"
     size = led_strip.size
-    sin1 = SinGenerator.new(size).set(phase: 10, frequency: 1.5, speed: 1)
-    sin2 = SinGenerator.new(size).set(phase: 20, frequency: 4.3, speed: 0.9)
-    sin3 = SinGenerator.new(size).set(phase: 30, frequency: 2.1, speed: 0.5)
-    sin4 = SinGenerator.new(size).set(frequency: 7, speed: -3.2)
-    sin5 = SinGenerator.new(size).set(frequency: 3, speed: -2.1)
-    sin6 = SinGenerator.new(size).set(frequency: 1, speed: 2.7)
+    @sin1 = SinGenerator.new(size).set(phase: 10, frequency: 1.5, speed: 1)
+ #   sin2 = SinGenerator.new(size).set(phase: 20, frequency: 4.3, speed: 0.9)
+ #   sin3 = SinGenerator.new(size).set(phase: 30, frequency: 2.1, speed: 0.5)
+ #   sin4 = SinGenerator.new(size).set(frequency: 7, speed: -3.2)
+ #   sin5 = SinGenerator.new(size).set(frequency: 3, speed: -2.1)
+ #   sin6 = SinGenerator.new(size).set(frequency: 1, speed: 2.7)
     sum = SumGenerator.new([
-                             sin1,
+                             @sin1,
 #                             sin2,
 #                             sin3,
 #                             sin4,
