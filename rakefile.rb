@@ -24,3 +24,18 @@ desc 'compile native off'
 task :compile_off do
   sh "g++ -std=c++11 -Isrc/lib/cpp src/main/cpp/off.cpp -o off.exe"
 end
+
+desc 'list with httpie'
+task :presets do
+  sh "http http://osmc.local:4567/presets"
+end
+
+desc 'activate on preset'
+task :activate do
+  sh "http -v --form http://osmc.local:4567/activate id=3"
+end
+
+desc 'set a value of the activated preset'
+task :set do
+  sh "http -v --form http://osmc.local:4567/set color1=ff0000"
+end
