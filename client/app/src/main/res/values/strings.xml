@@ -1,4 +1,5 @@
 <resources>
   <string name="app_name">DotStar</string>
   <string name="title_preset_detail">Preset Detail</string>
+  <string name="action_settings">Settings</string>
 </resources>

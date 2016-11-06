@@ -35,6 +35,11 @@ task :activate do
   sh "http -v --form http://osmc.local:4567/activate id=3"
 end
 
+desc 'off'
+task :off do
+  sh "http -v --form http://osmc.local:4567/activate id=0"
+end
+
 desc 'set a value of the activated preset'
 task :set do
   sh "http -v --form http://osmc.local:4567/set color1=ff0000"
