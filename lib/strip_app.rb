@@ -232,6 +232,16 @@ class Sinus2
   end
 end
 
+class YellowBlue < Sinus2
+  def name
+    return "YellowBlue"
+  end
+  def start(led_strip)
+    super(led_strip)
+    set({"color1" => "ff1a3dff", "color2" => "ffffcc00"})
+  end
+end
+
 class Pusher
   def initialize(&block)
     @block = block
@@ -321,8 +331,10 @@ class MyTcpSocket < TCPSocket
     return [nil, @addr]
   end
 end
+
 class App < Sinatra::Base
   set :bind, "0.0.0.0"
+  set :views, settings.root + '/../views'
   def initialize()
     super()
     puts "initialize: #{self}"
@@ -330,9 +342,14 @@ class App < Sinatra::Base
     @presets << Off.new
     @presets << Sinus1.new
     @presets << Sinus2.new
+    @presets << YellowBlue.new
     @presets << Midi.new
     @presets << CKJenkins.new
     @led_control = LedControl.new
+  end
+
+  get '/' do
+    erb :index, locals: {presets: @presets}
   end
 
   get '/presets' do
@@ -381,36 +398,3 @@ class App < Sinatra::Base
     @announce = DNSSD.register(File.read('location.txt'), "_dotstar._tcp", nil, 4567)
   end
 end
-
-#STRIP_SIZE = 1
-#
-#filters = Array.new
-#
-#class FakeStrip
-#  def initialize(size)
-#    @pixels = Array.new(size)
-#  end
-#  def set_pixel(idx, v)
-#    @pixels[idx] = v
-#  end
-#  def refresh
-#    puts @pixels
-#  end
-#end
-#
-##strip = DotStarStrip.new(STRIP_SIZE)
-#strip = FakeStrip.new(STRIP_SIZE)
-#filters << DotStarLib::SinFilter.new.set(frequency: 2, speed: 1)
-##filters << DotStarLib::ColorFilter.new.set(color: 0xff0000)
-#
-#while true
-#  data = Array.new(STRIP_SIZE)
-#  data = filters.reduce([Array.new(STRIP_SIZE)]) {|data, filter|
-#    filter.process(data)
-#  }
-#
-#  data.first.each_with_index { |v, i|
-#    strip.set_pixel(i, v)
-#  }
-#  strip.refresh
-#end
