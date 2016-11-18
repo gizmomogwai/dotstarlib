@@ -48,6 +48,7 @@ class AddHandler
 end
 
 class LedControl
+  attr_reader :current_preset
   def initialize
     @led_strip = DotStarStrip.new(120)
     @queue = Queue.new
@@ -350,6 +351,10 @@ class App < Sinatra::Base
 
   get '/' do
     erb :index, locals: {presets: @presets}
+  end
+
+  get '/configure' do
+    erb :configure, locals: {preset: @led_control.current_preset}
   end
 
   get '/presets' do

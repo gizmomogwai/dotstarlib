@@ -17,7 +17,8 @@ module DotStarLib
 
     def set(params)
       puts "ColorizeGenerator.set(#{params})"
-      i = Integer(params[:value], 16)
+      m = params[:value].match(/#?(......)/)
+      i = Integer(m[1], 16)
       puts i
       @value = Value.from_int(i) || Value.new(1.0, 0.0, 0.0)
       puts @value
