@@ -10,11 +10,11 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </head>
   <body>
-    <a href="/configure">configure current preset</a>
+    <a href="/configure"><h1>configure current preset</h1></a>
     <% presets.each_with_index do |preset, index| %>
     <form action="/activate" method="post">
       <input type="hidden" name="id" value="<%= index %>" />
-      <input type="submit" value="<%= preset.name %>" />
+      <input type="submit" value="<%= preset.name %>" style="height:100px; width:500px" />
     </form>
     <% end %>
     <script type="text/javascript">

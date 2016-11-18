@@ -6,11 +6,10 @@ include DotStarLib
 require 'dnssd'
 begin
   require 'dotstar'
-rescue
+rescue LoadError
   puts "Warning: could not open dotstar native support => using sim"
   require 'dotstarsimulator'
 end
-
 
 class Handler
   def initialize(count)

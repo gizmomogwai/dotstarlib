@@ -10,18 +10,18 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </head>
   <body>
-    <a href="/">back to index</a>
-    <%= preset.name %>
+    <a href="/"><h1>back to index</h1></a>
+    <h1><%= preset.name %></h1>
     <form action="/set" method="post">
       <% preset.parameters.each do |parameter| %>
       <% if parameter[:type] == :color %>
-      <%= parameter[:name] %>: <input type="color" name="<%= parameter[:name] %>" />
+      <%= parameter[:name] %>: <input type="color" name="<%= parameter[:name] %>" style="height:100px; width:500px" />
       <% else %>
       <%= parameter[:name] %>
       <% end %>
       </br>
       <% end %>
-      <input type="submit" value="apply">Apply</input>
+      <input type="submit" value="apply" style="height:100px; width:500px" />
     </form>
     <script type="text/javascript">
       $(document).ready(function(){
