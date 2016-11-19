@@ -238,7 +238,7 @@ class YellowBlue < Sinus2
   end
   def start(led_strip)
     super(led_strip)
-    set({"color1" => "ff1a3dff", "color2" => "ffffcc00"})
+    set({"color1" => "0000ff", "color2" => "ffff00"})
   end
 end
 
