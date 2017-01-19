@@ -276,7 +276,22 @@ class CKJenkins
   def set(data)
   end
   def start(led_strip)
-    @generator = JenkinsGenerator.new(led_strip.size, ['cgw3'], ['audi-cgw3', 'AudiDataCollector'], Pulse.new)
+    @generator = JenkinsGenerator.new(led_strip.size,
+                                      ['cgw3-build-server'],
+                                      [
+                                        'Audi-cGW-Low-Platform-Master',
+                                        'ECall-Master',
+                                        'Gateway-Master',
+                                        'HiSi-Balong-4G-Platform-Master',
+                                        'Java-Master',
+                                        'Java-Tests-Master',
+                                        'Native-Master',
+                                        'Native-Tests-Master',
+                                        'Nightly-Release-Builds',
+                                        'Release-ECall-Master',
+                                        'Release-Master',
+                                        'SmokeTests-Master'
+                                      ], Pulse.new)
     @puller = Puller.new(@generator, led_strip)
   end
   def stop

@@ -48,9 +48,15 @@ module DotStarLib
       require 'json'
       now = Time.now
       if now - @last_update > 10
-        string = Net::HTTP.get(@name[1..-1], '/api/json')
-        #File.write("#{server}.response", string)
-        #string = File.read("#{@name[1..-1]}.response")
+        uri = URI("http://#{@name[1..-1]}/api/json")
+        puts "URI: #{uri}"
+        req = Net::HTTP::Get.new(uri)
+        req.basic_auth('christian.koestlin', 'bfa545311c38d5411ff9daa76689b1b8')
+        res = Net::HTTP.start(uri.hostname, uri.port) {|http|
+          http.request(req)
+        }
+        string = res.body #Net::HTTP.get(@name[1..-1], '/api/json')
+        puts string
         @jobs = JSON.parse(string)['jobs'].map{ |j|
           Job.normal_job(j['name'],
                          j['color'],
