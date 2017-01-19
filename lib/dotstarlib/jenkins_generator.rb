@@ -40,8 +40,12 @@ module DotStarLib
 
   class Server
     attr_reader :name, :jobs, :job
-    def initialize(name)
-      @name = "@#{name}"
+    def initialize(connect_string)
+      parts = connect_string.split('@')
+      user_pass = parts.first.split(':')
+      @username = user_pass.first
+      @basic_auth = user_pass[1]
+      @name = parts[1]
       @last_update = Time.new(0)
     end
     def update()
@@ -80,7 +84,7 @@ module DotStarLib
 
     def initialize(size, servers, jobs, pulse)
       @size = size
-      @servers = servers.map{|name| Server.new(name)}
+      @servers = servers.map{|connect_string| Server.new(connect_string)}
       @pixels = jobs.map{|j|Pixel.new(j)} + servers.map{|s|Pixel.new("@#{s}")}
       @pulse = pulse
     end
