@@ -52,10 +52,10 @@ module DotStarLib
       require 'json'
       now = Time.now
       if now - @last_update > 10
-        uri = URI("http://#{@name[1..-1]}/api/json")
+        uri = URI("http://#{@name}/api/json")
         puts "URI: #{uri}"
         req = Net::HTTP::Get.new(uri)
-        req.basic_auth('christian.koestlin', 'bfa545311c38d5411ff9daa76689b1b8')
+        req.basic_auth(@username, @basic_auth)
         res = Net::HTTP.start(uri.hostname, uri.port) {|http|
           http.request(req)
         }
