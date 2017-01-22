@@ -12,7 +12,7 @@
               tools:context=".Index">
 
   <!--
-  This layout is a two-pane layout for the Presets
+  This layout is activity two-pane layout for the Presets
   master/detail flow.
 
   -->

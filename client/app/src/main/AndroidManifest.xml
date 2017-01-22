@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.flopcode.dotstar.android">
+  package="com.flopcode.dotstar.android">
   <uses-permission android:name="android.permission.INTERNET"/>
   <application
     android:allowBackup="true"
@@ -27,7 +27,14 @@
           android:scheme="zeroconf"
           android:host="_dotstar._tcp.local."/>
       </intent-filter>
-
+      <intent-filter>
+        <action
+          android:name="android.intent.action.VIEW"/>
+        <category
+          android:name="android.intent.category.DEFAULT"/>
+        <data
+          android:scheme="dotstar"/>
+      </intent-filter>
     </activity>
     <activity
       android:name=".PresetDetailActivity"

@@ -3,19 +3,22 @@ package com.flopcode.dotstar.android;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
+import android.net.nsd.NsdManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.util.Log;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import butterknife.BindView;
 import com.flopcode.dotstar.android.DotStarApi.DotStar;
@@ -29,10 +32,10 @@ import java.util.List;
 import static butterknife.ButterKnife.bind;
 
 /**
- * An activity representing a list of Presets. This activity
+ * An activity representing activity list of Presets. This activity
  * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link PresetDetailActivity} representing
+ * handsets, the activity presents activity list of items, which when touched,
+ * lead to activity {@link PresetDetailActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
@@ -45,18 +48,21 @@ public class Index extends AppCompatActivity {
   @BindView(R.id.coordinator)
   public CoordinatorLayout coordinator;
   /**
-   * Whether or not the activity is in two-pane mode, i.e. running on a tablet
+   * Whether or not the activity is in two-pane mode, i.e. running on activity tablet
    * device.
    */
   private boolean mTwoPane;
   private SimpleItemRecyclerViewAdapter adapter;
+  private DotStarsMenu dotstars;
 
   public static String getConnectionPrefs(Context c) {
     return PreferenceManager.getDefaultSharedPreferences(c).getString(DOT_STAR_SERVER, "");
   }
 
-  public static void storeConnectionPrefs(Context c, String connection) {
+  public static void storeConnectionPrefs(Context c, String host, int port) {
     Editor e = PreferenceManager.getDefaultSharedPreferences(c).edit();
+    String connection = "http://" + host + ":" + port;
+    Log.d(LOG_TAG, "switching to: " + connection);
     e.putString(DOT_STAR_SERVER, connection);
     e.commit();
   }
@@ -73,30 +79,25 @@ public class Index extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    final Intent intent = getIntent();
-    if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-      String host = intent.getStringExtra("host");
-      int port = intent.getIntExtra("port", 4567);
-      storeConnectionPrefs(this, "http://" + host + ":" + port);
-    }
-    setContentView(R.layout.activity_preset_list);
+    handleIntents(getIntent());
+
+    setContentView(R.layout.index_activity);
     bind(this);
 
+    updateNavigationView();
     adapter = new SimpleItemRecyclerViewAdapter();
 
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
     toolbar.setTitle(getTitle());
-/*
-    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-    fab.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-          .setAction("Action", null).show();
-      }
-    });
-*/
+
+    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+      this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+    drawer.addDrawerListener(toggle);
+    toggle.syncState();
+
+
     list.setAdapter(adapter);
 
     if (findViewById(R.id.preset_detail_container) != null) {
@@ -107,6 +108,30 @@ public class Index extends AppCompatActivity {
       mTwoPane = true;
     }
   }
+
+  private void handleIntents(Intent intent) {
+    if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+      Uri data = intent.getData();
+      if ((data != null) && ("dotstar".equals(data.getScheme()))) {
+        storeConnectionPrefs(this, data.getHost(), data.getPort());
+        return;
+      }
+
+      String host = intent.getStringExtra("host");
+      int port = intent.getIntExtra("port", 0);
+      if (host != null && port != 0) {
+        storeConnectionPrefs(this, host, port);
+        return;
+      }
+    }
+  }
+
+  private void updateNavigationView() {
+    NavigationView view = (NavigationView) findViewById(R.id.nav_view);
+    Menu m = view.getMenu();
+    dotstars = new DotStarsMenu(this, m, (NsdManager) getSystemService(Context.NSD_SERVICE));
+  }
+
 
   @Override
   protected void onResume() {
@@ -129,6 +154,27 @@ public class Index extends AppCompatActivity {
     }
   }
 
+  @Override
+  public void onBackPressed() {
+    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+    if (drawer.isDrawerOpen(GravityCompat.START)) {
+      drawer.closeDrawer(GravityCompat.START);
+    } else {
+      super.onBackPressed();
+    }
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+  }
+
+  @Override
+  protected void onDestroy() {
+    dotstars.destroy();
+    super.onDestroy();
+  }
+
   private void showPreferencesSnack() {
     Snackbar.make(coordinator, "Problems with DotStarServer", Snackbar.LENGTH_INDEFINITE).setAction("Preferences", new OnClickListener() {
       @Override
@@ -145,11 +191,12 @@ public class Index extends AppCompatActivity {
     return true;
   }
 
+
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     // Handle action bar item clicks here. The action bar will
     // automatically handle clicks on the Home/Up button, so long
-    // as you specify a parent activity in AndroidManifest.xml.
+    // as you specify activity parent activity in AndroidManifest.xml.
     int id = item.getItemId();
 
     //noinspection SimplifiableIfStatement
@@ -160,6 +207,7 @@ public class Index extends AppCompatActivity {
 
     return super.onOptionsItemSelected(item);
   }
+
 
   public class SimpleItemRecyclerViewAdapter
     extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
