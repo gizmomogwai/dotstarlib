@@ -1,4 +1,5 @@
 require 'json'
+require 'yaml'
 require 'sinatra/base'
 require 'byebug'
 require 'dotstarlib'
@@ -283,22 +284,12 @@ class CKJenkins
   def set(data)
   end
   def start(led_strip)
+    jenkins_config = YAML.load('jenkins_config.local')
+    jobs = jenkins_config['jobs']
+    servers = jenkins_config['servers']
     @generator = JenkinsGenerator.new(led_strip.size,
-                                      ['cgw3-build-server'],
-                                      [
-                                        'Audi-cGW-Low-Platform-Master',
-                                        'ECall-Master',
-                                        'Gateway-Master',
-                                        'HiSi-Balong-4G-Platform-Master',
-                                        'Java-Master',
-                                        'Java-Tests-Master',
-                                        'Native-Master',
-                                        'Native-Tests-Master',
-                                        'Nightly-Release-Builds',
-                                        'Release-ECall-Master',
-                                        'Release-Master',
-                                        'SmokeTests-Master'
-                                      ], Pulse.new)
+                                      servers,
+                                      jobs, Pulse.new)
     @puller = Puller.new(@generator, led_strip)
   end
   def stop

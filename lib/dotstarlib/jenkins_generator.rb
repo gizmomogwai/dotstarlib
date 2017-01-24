@@ -39,40 +39,38 @@ module DotStarLib
   end
 
   class Server
-    attr_reader :name, :jobs, :job
-    def initialize(connect_string)
-      parts = connect_string.split('@')
-      user_pass = parts.first.split(':')
-      @username = user_pass.first
-      @basic_auth = user_pass[1]
-      @name = parts[1]
+    attr_reader :host, :jobs, :job
+    def initialize(server)
+      @username = server['username']
+      @basic_auth = server['basic_auth']
+      @host = server['host']
       @last_update = Time.new(0)
     end
     def update()
       require 'json'
       now = Time.now
       if now - @last_update > 10
-        uri = URI("http://#{@name}/api/json")
+        uri = URI("http://#{@host}/api/json")
         puts "URI: #{uri}"
         req = Net::HTTP::Get.new(uri)
         req.basic_auth(@username, @basic_auth)
         res = Net::HTTP.start(uri.hostname, uri.port) {|http|
           http.request(req)
         }
-        string = res.body #Net::HTTP.get(@name[1..-1], '/api/json')
+        string = res.body
         puts string
         @jobs = JSON.parse(string)['jobs'].map{ |j|
           Job.normal_job(j['name'],
                          j['color'],
                          j['color'])
         }
-        @job = Job.new(@name, :machine, @jobs.find{|j|j.in_progress} != nil)
+        @job = Job.new(@host, :machine, @jobs.find{|j|j.in_progress} != nil)
         @last_update = now
       end
       return @jobs
     end
     def to_s
-      "Server(#{@name})"
+      "Server(#{@host})"
     end
   end
 
@@ -84,7 +82,7 @@ module DotStarLib
 
     def initialize(size, servers, jobs, pulse)
       @size = size
-      @servers = servers.map{|connect_string| Server.new(connect_string)}
+      @servers = servers.map{|server| Server.new(server)}
       @pixels = jobs.map{|j|Pixel.new(j)} + servers.map{|s|Pixel.new("@#{s}")}
       @pulse = pulse
     end
