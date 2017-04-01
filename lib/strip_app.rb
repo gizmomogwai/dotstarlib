@@ -11,6 +11,13 @@ rescue LoadError
   require 'dotstarsimulator'
 end
 
+class Settings
+  def self.get(key)
+    require 'yaml'
+    YAML.load(File.read('settings.yaml'))[key]
+  end
+end
+
 class Handler
   def initialize(count)
     @count = count
@@ -49,7 +56,7 @@ end
 class LedControl
   attr_reader :current_preset
   def initialize
-    @led_strip = DotStarStrip.new(120)
+    @led_strip = DotStarStrip.new(Settings.get('nr_of_leds'))
     @queue = Queue.new
     @current_preset = Off.new
     Thread.new do
@@ -414,6 +421,8 @@ class App < Sinatra::Base
   #  end
   #end
   run! do |server|
-    @announce = DNSSD.register(File.read('location.txt'), "_dotstar._tcp", nil, 4567)
+    location = Settings.get('location')
+    puts "using location from settings.yaml #{location}"
+    @announce = DNSSD.register(location, "_dotstar._tcp", nil, 4567)
   end
 end
