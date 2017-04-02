@@ -1,3 +1,4 @@
 ---
-location: raspi3
-nr_of_leds: 120
+location: wohnzimmer
+nr_of_leds: 60
+
