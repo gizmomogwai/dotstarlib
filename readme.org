@@ -1,8 +1,18 @@
 * Prerequisites
-** sudo apt-get install rake libavahi-compat-libdnssd-dev
-** activate spi module in rasp-config
-** grow partition in rasp-config
-** gem install rice rake-compiler build-essential
-** install rvm and ruby 2.3.0
-
-- cp dotstar.service to /etc/systemd/system and enable with sudo systemctl enable dotstar.service
+- raspian-lite
+- rasp-config
+  - interfacing
+    - ssh
+    - spi
+- sudo apt-get install libavahi-compat-libdnssd-dev openssl emacs
+- install rvm from rvm.io
+- rvm install 2.4.1
+- git clone git@github.com:gizmomogwai/dotstarlib.git
+- cd dotstarlib
+- gem install bundler
+- bundle install --without ui
+- rake compile
+- adjust settings.yaml
+- ./start.sh
+- cp dotstar.service to /etc/systemd/system and
+- enable with sudo systemctl enable dotstar.service
