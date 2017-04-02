@@ -1,0 +1,16 @@
+[Unit]
+Description=dotstar
+
+[Service]
+User=osmc
+Group=osmc
+
+Type=simple
+ExecStart=/home/osmc/dotstarlib/start.sh
+Restart=on-failure
+RestartSec=60
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

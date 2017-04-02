@@ -5,3 +5,4 @@
 ** gem install rice rake-compiler build-essential
 ** install rvm and ruby 2.3.0
 
+- cp dotstar.service to /etc/systemd/system and enable with sudo systemctl enable dotstar.service
