@@ -1,4 +1,5 @@
 module DotStarLib
+  # values range normally from 0 .. 255. clamp makes sure of this
   class Value
     attr_accessor :red, :green, :blue
     def initialize(r, g=0, b=0)

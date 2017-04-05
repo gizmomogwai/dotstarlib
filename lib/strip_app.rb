@@ -128,6 +128,7 @@ def update_strip(generator, led_strip)
   led_strip.refresh
 end
 
+# runs a thread that pulls values for the led_strip from the generator
 class Puller
   def initialize(generator, led_strip)
     @generator = generator
@@ -184,7 +185,6 @@ class Sinus1
     @sin1.set(d) if @sin1
   end
   def start(led_strip)
-
     size = led_strip.size
     @sin1 = SinGenerator.new(size).set(phase: 10, frequency: 1.5, speed: 1)
  #   sin2 = SinGenerator.new(size).set(phase: 20, frequency: 4.3, speed: 0.9)
@@ -250,6 +250,7 @@ class YellowBlue < Sinus2
   end
 end
 
+
 class Pusher
   def initialize(&block)
     @block = block
@@ -297,6 +298,42 @@ class CKJenkins
     @puller.stop_it if @puller
   end
 end
+
+class Alarm
+  def name
+    "Alarm"
+  end
+  def parameters
+    return [
+      {type: :color, name: "color1"},
+      {type: :color, name: "color2"},
+      {type: :time, name: "alarm"},
+      {type: :time, name: "fade"}
+    ]
+  end
+  def set(data)
+    puts "incoming alarm data: #{data}"
+    @color1.set({value: data["color1"]}) if @color1 && data.include?("color1")
+    @color2.set({value: data["color2"]}) if @color2 && data.include?("color2")
+    @timed_fade.set({alarm: data[:alarm], fade: data[:fade]}) if (@timed_fade && data.include?("alarm") && data.include?("fade"))
+  end
+  def start(led_strip)
+    puts "alarm"
+    size = led_strip.size
+    sin1 = SinGenerator.new(size).set(phase: 0, frequency: 1.0, speed: 0.5)
+    sin2 = SinGenerator.new(size).set(phase: 180, frequency: 2.0, speed: -0.5)
+    @color1 = ColorizeGenerator.new(sin1, Value.new(0, 0, 255))
+    @color2 = ColorizeGenerator.new(sin2, Value.new(0, 255, 255))
+    sum = SumGenerator.new([@color1, @color2])
+    @timed_fade = TimedFadeGenerator.new(sum)
+    @generator = ClampGenerator.new(@timed_fade)
+    @puller = Puller.new(@generator, led_strip)
+  end
+  def stop
+    @puller.stop_it if @puller
+  end
+end
+
 
 class Midi
   def initialize
@@ -356,6 +393,7 @@ class App < Sinatra::Base
     @presets << Sinus1.new
     @presets << Sinus2.new
     @presets << YellowBlue.new
+    @presets << Alarm.new
     @presets << Midi.new
     @presets << CKJenkins.new
     @led_control = LedControl.new

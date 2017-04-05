@@ -17,7 +17,7 @@
       <% if parameter[:type] == :color %>
       <%= parameter[:name] %>: <input type="color" name="<%= parameter[:name] %>" style="height:100px; width:500px" />
       <% else %>
-      <%= parameter[:name] %>
+      <%= parameter[:name] %>: <input type="text" name="<%= parameter[:name] %>" />
       <% end %>
       </br>
       <% end %>

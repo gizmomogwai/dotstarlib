@@ -2,8 +2,8 @@ require 'dotstarlib/filters'
 
 module DotStarLib
   class SinFilter < Filter
-    def initialize
-      @phase = 0
+    def initialize(size)
+      @size = size
     end
 
     def process(channel)
