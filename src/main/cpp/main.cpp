@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
+#include <time.h>
 
 void off(DotStarStrip& strip) {
   for (int i=0; i<strip.size(); ++i) {
@@ -16,6 +17,25 @@ void on(DotStarStrip& strip) {
     strip.setPixel(i, 0x7f7f7f);
   }
   strip.refresh();
+}
+void fade(DotStarStrip& strip, int shift) {
+  struct timespec ts = {0, 25000000};
+  for (int i=0; i<255; ++i) {
+    for (int j=0; j<strip.size(); ++j) {
+      strip.setPixel(j, i << shift);
+    }
+    strip.refresh();
+    
+    ::nanosleep(&ts, nullptr);
+  }
+  for (int i=255; i>=0; --i) {
+    for (int j=0; j<strip.size(); ++j) {
+      strip.setPixel(j, i << shift);
+    }
+    strip.refresh();
+    
+    ::nanosleep(&ts, nullptr);
+  }
 }
 int main(int argc, char** args) {
   try {
@@ -31,6 +51,11 @@ int main(int argc, char** args) {
     sleep(1);
     off(strip);
     sleep(1);
+    fade(strip, 16);    
+    fade(strip, 0);
+    fade(strip, 7);
+    fade(strip, 8);
+    fade(strip, 12);
     /*
     strip.setPixel(1, 0xff0000);
     strip.setPixel(2, 0xffff00);
