@@ -10,6 +10,7 @@ module DotStarLib
       @second = s
     end
     def self.from(str)
+      return nil unless str
       return Moment.new(*str.split(':').map{|i|Integer(i)})
     end
     def self.now
@@ -34,13 +35,14 @@ module DotStarLib
   class TimedFadeGenerator < Generator
     def initialize(generator=nil)
       @generator = generator
-      @alarm = Moment.new(7, 0)
+      @alarm = Moment.from("07:00")
       @fade = 300
+      @scale = default_scale
     end
 
     def process(channel)
       m = @time || Moment.now
-      f = factor_for(m, @alarm, @fade)
+      f = factor_for(m, @alarm, @fade) * @scale
       channel = @generator.process(nil) if @generator
       return Channel.new(channel.values.map { |v| v.multiply_with_scalar(f) })
     end
@@ -65,16 +67,17 @@ module DotStarLib
         return 1.0
       end
     end
-
-    # takes hash pf :alarm, :fade, :time
+    def default_scale
+      return 1.0
+    end
+    def default_alarm
+      return Moment.from("07:00")
+    end
     def set(params)
-      v = params[:alarm]
-      @alarm = Moment.from(params[:alarm])
-      @fade = Integer(params[:fade])
-      @time = params[:time]
-      if @time
-        @time = Moment.from(@time)
-      end
+      @scale = Float(params[:scale] || default_scale)
+      @alarm = Moment.from(params[:alarm]) || default_alarm
+      @fade = Integer(params[:fade] || 300)
+      @time = Moment.from(params[:time])
       puts "Setting alarmtime to #{@alarm} with fading #{@fade} (simulated time: #{@time})"
       return self
     end

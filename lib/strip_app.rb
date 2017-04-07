@@ -308,14 +308,15 @@ class Alarm
       {type: :color, name: "color1"},
       {type: :color, name: "color2"},
       {type: :time, name: "alarm"},
-      {type: :time, name: "fade"}
+      {type: :time, name: "fade"},
+      {type: :range, name: "scale", min: 0.1, max: 1.0},
     ]
   end
   def set(data)
     puts "incoming alarm data: #{data}"
     @color1.set({value: data["color1"]}) if @color1 && data.include?("color1")
     @color2.set({value: data["color2"]}) if @color2 && data.include?("color2")
-    @timed_fade.set({alarm: data[:alarm], fade: data[:fade]}) if (@timed_fade && data.include?("alarm") && data.include?("fade"))
+    @timed_fade.set({alarm: data[:alarm], fade: data[:fade], scale: data[:scale]})
   end
   def start(led_strip)
     puts "alarm"

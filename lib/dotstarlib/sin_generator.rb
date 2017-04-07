@@ -1,7 +1,8 @@
 require 'dotstarlib/generator'
 
 module DotStarLib
-  class SinGenerator < Generator
+
+  gsclass SinGenerator < Generator
     def initialize(size)
       @size = size
       @phase = 0
@@ -18,11 +19,9 @@ module DotStarLib
     end
 
     def set(params)
-#      puts "old: #{@phase}, #{@frequency}, #{@speed}"
       @phase = Float(get(params, :phase, @phase))
       @frequency = Float(get(params, :frequency, @frequency))
       @speed = Float(get(params, :speed, @speed))
- #     puts "new: #{@phase}, #{@frequency}, #{@speed}"
       return self
     end
 
@@ -32,6 +31,6 @@ module DotStarLib
       return params[what] if params.include?(what)
       return default_value
     end
-    # register("Sin", [:frequency, :speed, :phase ])
   end
+  
 end
