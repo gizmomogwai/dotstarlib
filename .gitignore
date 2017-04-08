@@ -1,4 +1,4 @@
-jenkins_config.local
+*.local
 out
 tmp
 lib/dotstar.bundle
