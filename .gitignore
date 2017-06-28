@@ -11,4 +11,7 @@ build
 .idea
 *.ipr
 *.iws
+*.iml
 location.txt
+\#*
+.#*
