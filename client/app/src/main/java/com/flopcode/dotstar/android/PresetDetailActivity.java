@@ -31,7 +31,7 @@ public class PresetDetailActivity extends AppCompatActivity {
     setSupportActionBar(toolbar);
 
     final Preset preset = (Preset) getIntent().getSerializableExtra(PresetDetailFragment.ARG_ITEM_ID);
-    Call<Void> activate = Index.getDotStar(getConnectionPrefs(this)).activate(preset.id);
+    Call<Void> activate = Index.getDotStar(getConnectionPrefs(this)).activate(preset.name);
     activate.enqueue(new Callback<Void>() {
       @Override
       public void onResponse(Call<Void> call, Response<Void> response) {

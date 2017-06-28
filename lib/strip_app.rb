@@ -174,6 +174,7 @@ class Sinus1
   end
   def parameters
     return [
+      {type: :bool, name: "test"},
       {type: :color, name: "color"},
       {type: :range, name: "frequency", min: 0.1, max: 3},
       {type: :range, name: "speed", min: -3, max: 3}
@@ -411,7 +412,6 @@ class App < Sinatra::Base
   get '/presets' do
     @presets.each_with_index.map {|i, index|
       {
-        id: index,
         name: i.name,
         parameters: i.parameters
       }
@@ -421,7 +421,7 @@ class App < Sinatra::Base
   post '/activate' do
     begin
       puts params
-      preset = @presets[Integer(params['id'])]
+      preset = @presets.find{|p|p.name == params['name']}
       @led_control.set_preset(preset)
     rescue => e
       puts e.backtrace

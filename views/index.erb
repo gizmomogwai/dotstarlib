@@ -13,7 +13,7 @@
     <a href="/configure"><h1>configure current preset</h1></a>
     <% presets.each_with_index do |preset, index| %>
     <form action="/activate" method="post">
-      <input type="hidden" name="id" value="<%= index %>" />
+      <input type="hidden" name="name" value="<%= preset.name %>" />
       <input type="submit" value="<%= preset.name %>" style="height:100px; width:500px" />
     </form>
     <% end %>

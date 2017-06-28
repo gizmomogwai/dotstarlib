@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.flask.colorpicker.ColorPickerView.WHEEL_TYPE;
@@ -29,6 +31,7 @@ import retrofit2.Response;
 import java.util.Arrays;
 import java.util.Map;
 
+import static com.flopcode.dotstar.android.Index.LOG_TAG;
 import static com.flopcode.dotstar.android.Index.getConnectionPrefs;
 import static com.flopcode.dotstar.android.Index.getDotStar;
 import static com.google.common.collect.Iterables.filter;
@@ -83,9 +86,9 @@ public class PresetDetailFragment extends Fragment {
     ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.preset_detail, container, false);
     for (Map<String, String> parameters : mItem.parameters) {
       Parameter p = Parameters.get(parameters);
-      Button b = p.createButton(inflater, rootView, getContext());
-      if (b != null) {
-        rootView.addView(b);
+      View view = p.createButton(inflater, rootView, getContext());
+      if (view != null) {
+        rootView.addView(view);
       }
     }
     return rootView;
@@ -110,16 +113,46 @@ public class PresetDetailFragment extends Fragment {
       this.name = params.get("name");
     }
 
-    public abstract Button createButton(LayoutInflater inflater, ViewGroup rootView, Context context);
+    public abstract View createButton(LayoutInflater inflater, ViewGroup rootView, Context context);
   }
 
+  private static class BoolParameter extends Parameter {
+
+    BoolParameter(Map<String, String> params) {
+      super(params);
+    }
+
+    @Override
+    public View createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
+      final CheckBox res = (CheckBox) inflater.inflate(R.layout.preset_checkbox, rootView, false);
+      res.setText(name);
+      res.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+          Call<Void> call = getDotStar(getConnectionPrefs(context)).set(ImmutableMap.of(name, "" + b));
+          call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+              Log.i(Index.LOG_TAG, "could set bool for '" + name + "'");
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+              Log.e(Index.LOG_TAG, "could not set bool for '" + name + "'", t);
+            }
+          });
+        }
+      });
+      return res;
+    }
+  }
   private static class ColorParameter extends Parameter {
     public ColorParameter(Map<String, String> params) {
       super(params);
     }
 
     @Override
-    public Button createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
+    public View createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
       final Button res = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
       res.setText(name);
       res.setOnClickListener(new OnClickListener() {
@@ -143,12 +176,12 @@ public class PresetDetailFragment extends Fragment {
                 call.enqueue(new Callback<Void>() {
                   @Override
                   public void onResponse(Call<Void> call, Response<Void> response) {
-                    Log.e(Index.LOG_TAG, "could set color");
+                    Log.i(Index.LOG_TAG, "could set color for '" + name + "'");
                   }
 
                   @Override
                   public void onFailure(Call<Void> call, Throwable t) {
-                    Log.e(Index.LOG_TAG, "could not set color", t);
+                    Log.e(Index.LOG_TAG, "could not set color for '" + name + "'", t);
                   }
                 });
               }
@@ -184,7 +217,7 @@ public class PresetDetailFragment extends Fragment {
     }
 
     @Override
-    public Button createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
+    public View createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
       final Button res = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
       res.setText(name);
       res.setOnClickListener(new OnClickListener() {
@@ -214,12 +247,12 @@ public class PresetDetailFragment extends Fragment {
               call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-                  Log.e(Index.LOG_TAG, "could set " + name);
+                  Log.i(Index.LOG_TAG, "could set range for '" + name + "'");
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-                  Log.e(Index.LOG_TAG, "could not set " + name, t);
+                  Log.e(Index.LOG_TAG, "could not set range for '" + name +"'", t);
                 }
               });
             }
@@ -251,6 +284,8 @@ public class PresetDetailFragment extends Fragment {
         return new ColorParameter(params);
       } else if (type.equals("range")) {
         return new RangeParameter(params);
+      } else if (type.equals("bool")) {
+        return new BoolParameter(params);
       }
       return null;
     }

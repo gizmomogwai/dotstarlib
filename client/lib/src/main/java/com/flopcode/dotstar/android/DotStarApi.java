@@ -47,7 +47,7 @@ public class DotStarApi {
 
     @FormUrlEncoded
     @POST("/activate")
-    Call<Void> activate(@Field("id") long id);
+    Call<Void> activate(@Field("name") String name);
 
     @FormUrlEncoded
     @POST("/set")

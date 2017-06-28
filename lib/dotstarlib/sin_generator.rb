@@ -2,7 +2,7 @@ require 'dotstarlib/generator'
 
 module DotStarLib
 
-  gsclass SinGenerator < Generator
+  class SinGenerator < Generator
     def initialize(size)
       @size = size
       @phase = 0
