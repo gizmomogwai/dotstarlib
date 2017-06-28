@@ -45,7 +45,6 @@
         android:name="android.support.PARENT_ACTIVITY"
         android:value=".Index"/>
     </activity>
-    <activity android:name=".PreferencesActivity"/>
   </application>
 
 </manifest>

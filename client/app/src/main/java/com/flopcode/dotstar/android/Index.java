@@ -138,7 +138,6 @@ public class Index extends AppCompatActivity {
     super.onResume();
     DotStar dotStar = getDotStar(getConnectionPrefs(this));
     if (dotStar == null) {
-      showPreferencesSnack();
     } else {
       dotStar.index().enqueue(new Callback<List<Preset>>() {
         @Override
@@ -148,7 +147,7 @@ public class Index extends AppCompatActivity {
 
         @Override
         public void onFailure(Call<List<Preset>> call, Throwable t) {
-          showPreferencesSnack();
+          Log.e(LOG_TAG, "could not connect to dotstar server", t);
         }
       });
     }
@@ -175,37 +174,11 @@ public class Index extends AppCompatActivity {
     super.onDestroy();
   }
 
-  private void showPreferencesSnack() {
-    Snackbar.make(coordinator, "Problems with DotStarServer", Snackbar.LENGTH_INDEFINITE).setAction("Preferences", new OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        startActivity(new Intent(Index.this, PreferencesActivity.class));
-      }
-    }).show();
-  }
-
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     // Inflate the menu; this adds items to the action bar if it is present.
     getMenuInflater().inflate(R.menu.menu_main, menu);
     return true;
-  }
-
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    // Handle action bar item clicks here. The action bar will
-    // automatically handle clicks on the Home/Up button, so long
-    // as you specify activity parent activity in AndroidManifest.xml.
-    int id = item.getItemId();
-
-    //noinspection SimplifiableIfStatement
-    if (id == R.id.action_settings) {
-      startActivity(new Intent(this, PreferencesActivity.class));
-      return true;
-    }
-
-    return super.onOptionsItemSelected(item);
   }
 
 

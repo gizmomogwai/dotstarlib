@@ -12,7 +12,7 @@
   <include
     layout="@layout/preset_list_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"/>
 
   <android.support.design.widget.NavigationView
     android:id="@+id/nav_view"
@@ -21,6 +21,6 @@
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
     app:headerLayout="@layout/preset_list_drawer_header"
-    app:menu="@menu/index_activity_drawer" />
+    app:menu="@menu/index_activity_drawer"/>
 
 </android.support.v4.widget.DrawerLayout>
