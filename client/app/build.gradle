@@ -48,6 +48,8 @@ android {
   defaultConfig {
     minSdkVersion 21
     targetSdkVersion 21
+    versionCode 1
+    versionName "1"
   }
 
   dexOptions {
@@ -60,22 +62,27 @@ android {
     targetCompatibility JavaVersion.VERSION_1_7
   }
 
-  /*
   signingConfigs {
     release {
-      storeFile file("release.keystore")
-      storePassword passwordFromKeychain("books-play-store")
-      keyAlias "books"
-      keyPassword passwordFromKeychain("books-play-store")
+      // just add a new password with dotstar-play-store, dotstar-play-store and password in keychain on osx
+      storeFile file("store/release.keystore")
+      storePassword passwordFromKeychain("dotstar-play-store")
+      keyAlias "dotstar"
+      keyPassword passwordFromKeychain("dotstar-play-store")
     }
   }
 
   buildTypes {
     release {
       signingConfig signingConfigs.release
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      applicationIdSuffix ".release"
+    }
+    debug {
+      applicationIdSuffix ".debug"
     }
   }
-  */
 
   lintOptions {
     abortOnError false

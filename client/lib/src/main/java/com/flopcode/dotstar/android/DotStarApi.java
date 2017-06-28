@@ -40,7 +40,7 @@ public class DotStarApi {
     return new Retrofit.Builder().client(httpClient);
   }
 
-  interface DotStar {
+  public interface DotStar {
     @GET("/presets")
     @Headers("Accept: application/json")
     Call<List<Preset>> index();

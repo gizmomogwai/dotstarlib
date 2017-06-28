@@ -22,16 +22,17 @@ import com.flask.colorpicker.ColorPickerView.WHEEL_TYPE;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.flopcode.dotstar.android.parameters.Parameter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Map;
 
-import static com.flopcode.dotstar.android.Index.LOG_TAG;
 import static com.flopcode.dotstar.android.Index.getConnectionPrefs;
 import static com.flopcode.dotstar.android.Index.getDotStar;
 import static com.google.common.collect.Iterables.filter;
@@ -103,191 +104,18 @@ public class PresetDetailFragment extends Fragment {
     });
   }
 
-  static abstract class Parameter {
-    public final String name;
-
-    Parameter(Map<String, String> params) {
-      if (!params.containsKey("name")) {
-        throw new IllegalArgumentException();
-      }
-      this.name = params.get("name");
-    }
-
-    public abstract View createButton(LayoutInflater inflater, ViewGroup rootView, Context context);
-  }
-
-  private static class BoolParameter extends Parameter {
-
-    BoolParameter(Map<String, String> params) {
-      super(params);
-    }
-
-    @Override
-    public View createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
-      final CheckBox res = (CheckBox) inflater.inflate(R.layout.preset_checkbox, rootView, false);
-      res.setText(name);
-      res.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-          Call<Void> call = getDotStar(getConnectionPrefs(context)).set(ImmutableMap.of(name, "" + b));
-          call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-              Log.i(Index.LOG_TAG, "could set bool for '" + name + "'");
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-              Log.e(Index.LOG_TAG, "could not set bool for '" + name + "'", t);
-            }
-          });
-        }
-      });
-      return res;
-    }
-  }
-  private static class ColorParameter extends Parameter {
-    public ColorParameter(Map<String, String> params) {
-      super(params);
-    }
-
-    @Override
-    public View createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
-      final Button res = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
-      res.setText(name);
-      res.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          showColorPicker();
-        }
-
-        private void showColorPicker() {
-          ColorPickerDialogBuilder
-            .with(context)
-            .setTitle("Choose color for " + name)
-            .initialColor(0xffffffff)
-            .wheelType(WHEEL_TYPE.FLOWER)
-            .showAlphaSlider(false)
-            .density(30)
-            .setOnColorSelectedListener(new OnColorSelectedListener() {
-              @Override
-              public void onColorSelected(int selectedColor) {
-                Call<Void> call = getDotStar(getConnectionPrefs(context)).set(ImmutableMap.of(name, Integer.toHexString(selectedColor)));
-                call.enqueue(new Callback<Void>() {
-                  @Override
-                  public void onResponse(Call<Void> call, Response<Void> response) {
-                    Log.i(Index.LOG_TAG, "could set color for '" + name + "'");
-                  }
-
-                  @Override
-                  public void onFailure(Call<Void> call, Throwable t) {
-                    Log.e(Index.LOG_TAG, "could not set color for '" + name + "'", t);
-                  }
-                });
-              }
-            })
-            .setPositiveButton("ok", new ColorPickerClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
-                System.out.println("ok clicked");
-              }
-            })
-            .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int which) {
-                System.out.println("cancel clicked");
-              }
-            })
-            .build()
-            .show();
-        }
-      });
-      return res;
-    }
-  }
-
-  private static class RangeParameter extends Parameter {
-    public final Float min;
-    public final Float max;
-
-    public RangeParameter(Map<String, String> map) {
-      super(map);
-      min = new Float(map.get("min"));
-      max = new Float(map.get("max"));
-    }
-
-    @Override
-    public View createButton(LayoutInflater inflater, ViewGroup rootView, final Context context) {
-      final Button res = (Button) inflater.inflate(R.layout.preset_color_button, rootView, false);
-      res.setText(name);
-      res.setOnClickListener(new OnClickListener() {
-        float value = min;
-
-        @Override
-        public void onClick(View view) {
-          SeekBar seekBar = new SeekBar(context);
-          seekBar.setMax((int) ((max - min) * 10));
-          final AlertDialog alertDialog = new Builder(context)
-            .setTitle(calculateTitle())
-            .setView(seekBar)
-            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialogInterface, int i) {
-              }
-            })
-            .create();
-          alertDialog.show();
-          seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-              System.out.println("seekBar = " + seekBar);
-              value = (i / 10.0f) + min;
-              alertDialog.setTitle(calculateTitle());
-              Call<Void> call = getDotStar(getConnectionPrefs(context)).set(ImmutableMap.of(name, String.format("%.1f", value)));
-              call.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                  Log.i(Index.LOG_TAG, "could set range for '" + name + "'");
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                  Log.e(Index.LOG_TAG, "could not set range for '" + name +"'", t);
-                }
-              });
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-          });
-        }
-
-        private String calculateTitle() {
-          return "Range " + name + "(" + String.format("%.1f", value) + "/" + min + " - " + max + ")";
-        }
-      });
-      return res;
-    }
-  }
-
   static class Parameters {
     public static Parameter get(Map<String, String> params) {
       final String type = params.get("type");
-      if (type.equals("color")) {
-        return new ColorParameter(params);
-      } else if (type.equals("range")) {
-        return new RangeParameter(params);
-      } else if (type.equals("bool")) {
-        return new BoolParameter(params);
+      String className = "com.flopcode.dotstar.android.parameters." +
+        type.substring(0, 1).toUpperCase() + type.substring(1) +
+        "Parameter";
+      try {
+        Constructor<Parameter> p = (Constructor<Parameter>) Class.forName(className).getConstructor(Map.class);
+        return p.newInstance(params);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
-      return null;
     }
   }
 }

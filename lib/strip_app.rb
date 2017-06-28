@@ -174,7 +174,7 @@ class Sinus1
   end
   def parameters
     return [
-      {type: :bool, name: "test"},
+      {type: :bool, name: "active"},
       {type: :color, name: "color"},
       {type: :range, name: "frequency", min: 0.1, max: 3},
       {type: :range, name: "speed", min: -3, max: 3}
