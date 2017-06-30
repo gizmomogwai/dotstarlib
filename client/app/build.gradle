@@ -1,7 +1,3 @@
-import org.gradle.internal.logging.text.StyledTextOutput;
-import org.gradle.internal.logging.text.StyledTextOutputFactory;
-import org.gradle.internal.logging.text.StyledTextOutput.Style
-
 buildscript {
   repositories {
     jcenter()
@@ -10,11 +6,6 @@ buildscript {
   dependencies {
     classpath 'com.android.tools.build:gradle:2.3.3'
   }
-}
-repositories {
-  jcenter()
-  mavenCentral()
-  maven { url "https://jitpack.io" }
 }
 
 apply plugin: 'com.android.application'
@@ -40,6 +31,10 @@ dependencies {
 def passwordFromKeychain = { name ->
   return "security find-generic-password -s ${name} -a ${name} -w".execute().text.trim();
 }
+
+import org.gradle.internal.logging.text.StyledTextOutput;
+import org.gradle.internal.logging.text.StyledTextOutputFactory;
+import org.gradle.internal.logging.text.StyledTextOutput.Style
 
 def gitVersion = {
   def version = "git describe --dirty".execute().text.trim();
